@@ -44,51 +44,57 @@ En la primera iteración (S1) las lecturas se **simulan** y se guardan en JSON. 
 
 ## Arquitectura
 
-Patrón **Modelo-Vista-Controlador**.
+Patrón **Modelo-Vista-Controlador**, todo en Python.
 
 ```
-src/main/java/com/omero/hospital/
-├── App.java                  # Punto de entrada
+omero_hospital/
+├── main.py                   # Punto de entrada
 ├── model/
-│   ├── usuarios/             # Usuario, JefeSanidad, ResponsableCarpa, TecnicoLogistica
-│   ├── sensores/             # Sensor y subclases
-│   ├── actuadores/           # Actuador, Ventilador, IndicadorLED
-│   ├── estructuras/          # ListaEnlazada<T>, Nodo<T>
-│   └── Zona, Lectura, Alerta, Umbral
-├── view/                     # Clases de apoyo a las vistas
+│   ├── usuarios.py           # Usuario, JefeSanidad, ResponsableCarpa, TecnicoLogistica
+│   ├── sensores.py           # Sensor y subclases
+│   ├── actuadores.py         # Actuador, Ventilador, IndicadorLED
+│   ├── estructuras.py        # ListaEnlazada, Nodo
+│   └── dominio.py            # Zona, Lectura, Alerta, Umbral
+├── view/                     # Ventanas y widgets (una vista por pantalla/rol)
 ├── controller/               # Un controlador por vista
-├── service/                  # AlertaService, EstadisticaService, SimuladorSensores
-└── persistence/              # RepositorioJSON
-
-src/main/resources/com/omero/hospital/
-├── view/                     # Ficheros .fxml
-└── css/                      # Estilos (identidad OMERO)
+├── service/                  # alertas.py, estadistica.py, simulador.py
+├── persistence/              # repositorio_json.py
+└── assets/                   # Estilos (identidad OMERO), iconos
 
 data/                         # Ficheros JSON (usuarios, zonas, sensores, lecturas)
+tests/                        # Pruebas con pytest
 docs/                         # Memoria, UML, mockups, actas
 ```
 
 ## Tecnologías
 
-- Java 21
-- JavaFX 21
-- Maven
-- Gson (lectura/escritura JSON)
-- JUnit 5
-- S2: ESP32, MQTT, base de datos SQL
+- Python 3.12
+- PySide6 (Qt for Python) para la interfaz gráfica
+- Matplotlib para las gráficas
+- `json` de la librería estándar para la persistencia
+- pytest para las pruebas
+- S2: ESP32 (MicroPython), MQTT (`paho-mqtt`), base de datos SQL
 
 ## Requisitos
 
-- JDK 21
-- Maven 3.9 o superior
-- IDE recomendado: IntelliJ IDEA
+- Python 3.12 o superior
+- IDE recomendado: PyCharm o VS Code
 
 ## Instalación y ejecución
 
 ```bash
 git clone https://github.com/omero-uem/omero-hospital-campana.git
 cd omero-hospital-campana
-mvn clean javafx:run
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python -m omero_hospital.main
+```
+
+Ejecutar las pruebas:
+
+```bash
+pytest
 ```
 
 Usuarios de prueba en `data/usuarios.json`.
