@@ -42,30 +42,6 @@ En la primera iteración (S1) las lecturas se **simulan** y se guardan en JSON. 
 
 ---
 
-## Arquitectura
-
-Patrón **Modelo-Vista-Controlador**, todo en Python.
-
-```
-omero_hospital/
-├── main.py                   # Punto de entrada
-├── model/
-│   ├── usuarios.py           # Usuario, JefeSanidad, ResponsableCarpa, TecnicoLogistica
-│   ├── sensores.py           # Sensor y subclases
-│   ├── actuadores.py         # Actuador, Ventilador, IndicadorLED
-│   ├── estructuras.py        # ListaEnlazada, Nodo
-│   └── dominio.py            # Zona, Lectura, Alerta, Umbral
-├── view/                     # Ventanas y widgets (una vista por pantalla/rol)
-├── controller/               # Un controlador por vista
-├── service/                  # alertas.py, estadistica.py, simulador.py
-├── persistence/              # repositorio_json.py
-└── assets/                   # Estilos (identidad OMERO), iconos
-
-data/                         # Ficheros JSON (usuarios, zonas, sensores, lecturas)
-tests/                        # Pruebas con pytest
-docs/                         # Memoria, UML, mockups, actas
-```
-
 ## Tecnologías
 
 - Python 3.12
@@ -79,48 +55,6 @@ docs/                         # Memoria, UML, mockups, actas
 
 - Python 3.12 o superior
 - IDE recomendado: PyCharm o VS Code
-
-## Instalación y ejecución
-
-```bash
-git clone https://github.com/omero-uem/omero-hospital-campana.git
-cd omero-hospital-campana
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python -m omero_hospital.main
-```
-
-Ejecutar las pruebas:
-
-```bash
-pytest
-```
-
-Usuarios de prueba en `data/usuarios.json`.
-
-## Formato de una lectura
-
-```json
-{
-  "idSensor": "MQ135-CARPA1",
-  "zona": "CARPA1",
-  "tipo": "CALIDAD_AIRE",
-  "valor": 412,
-  "unidad": "ppm_aprox",
-  "timestamp": "2026-10-05T10:15:00"
-}
-```
-
----
-
-## Metodología
-
-- **SCRUM** con sprints de 2 semanas.
-- Product Backlog en **Trello**.
-- Flujo Git: `main` (entregas) ← `develop` (integración) ← `feature/OME-XX-descripcion`.
-- Todo cambio entra por Pull Request con revisión de otro miembro.
-- Guía completa en [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Roadmap S1
 
