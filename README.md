@@ -134,7 +134,7 @@ Usuarios de prueba en `data/usuarios.json`.
 
 | Nombre | GitHub |
 |---|---|
-| Alejandro Medina | @usuario |
+| Alejandro Medina | @roca200300 |
 | Jose Aceves | @JP-Aceves |
 | Alejandro Rodas | @usuario |
 | Ivan Sanz | @usuario |
