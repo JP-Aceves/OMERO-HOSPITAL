@@ -1,0 +1,372 @@
+{
+  "meta": {
+    "ultimaActualizacion": "2026-10-07",
+    "version": "0.1.0"
+  },
+
+  "proyecto": {
+    "nombre": "OMERO · Monitor de Hospital de Campaña",
+    "titulo": "Supervisión ambiental, de riesgos y de recursos críticos de un hospital de campaña en zona crítica",
+    "subtitulo": "Dashboard de escritorio en Python (PySide6, MVC) que supervisa el entorno, los riesgos y los recursos de un hospital de campaña con sensores ESP32.",
+    "tesis": "Las condiciones del entorno y los recursos básicos forman parte de la seguridad del paciente.",
+    "resumen": "Aplicación de escritorio en Python, con interfaz PySide6 y arquitectura Modelo-Vista-Controlador, que supervisa las condiciones ambientales, los riesgos y los recursos críticos de un hospital de campaña desplegado en una zona crítica. Recoge lecturas de temperatura, humedad, calidad del aire, humo y gas, nivel de depósito, viento y luz, las muestra de forma diferenciada a tres perfiles, genera alertas por umbrales, actúa sobre ventilación y señalización y predice por regresión lineal cuándo se agotará el depósito. En la primera iteración los datos se simulan y se guardan en JSON; en la segunda llegarán desde una maqueta con ESP32.",
+    "contexto": "Un hospital de campaña es una instalación sanitaria temporal que se despliega en pocas horas allí donde la red sanitaria ha quedado desbordada o destruida: terremotos, inundaciones, crisis humanitarias o misiones en zonas de conflicto. Funciona en carpas, depende de generadores y de depósitos de agua y combustible, y atiende a pacientes en un entorno expuesto al calor, al viento, al humo y a los cortes de energía. Una carpa a más de 30 °C, un aire viciado por la ocupación, una fuga de gas junto al generador o un depósito de agua que se vacía sin aviso son problemas que en un hospital fijo resuelven la climatización, los detectores de incendios y la red de suministro, pero que en campaña dependen de la vigilancia del propio personal.",
+    "problema": "En un hospital de campaña la información sobre el entorno, los riesgos y los recursos está dispersa y se obtiene de forma manual o mediante equipos independientes. No existe un panel único que reúna esos datos, muestre a cada perfil lo que necesita y avise a tiempo cuando algo se sale de rango.",
+    "pregunta": "¿Cómo puede un hospital de campaña supervisar en un solo sistema, ligero y barato, sus condiciones ambientales, sus riesgos y sus recursos críticos, de forma que cada miembro del personal reciba la información y las alertas que le corresponden?",
+    "alcance": "Supervisa entorno, riesgos y recursos, no constantes vitales de pacientes (los componentes son ambientales).",
+    "hueco": "Falta una herramienta ligera, barata y rápida de desplegar que integre en un solo panel ambiente, seguridad y recursos con vistas por rol.",
+    "referencias": [
+      "OTAN (Roles 1 a 4, AJP-4.10)",
+      "OMS (EMT Tipo 1, 2 y 3)",
+      "START (EMT Tipo 2 español, verificado por la OMS en 2018)",
+      "UME",
+      "Cruz Roja (ERU)",
+      "Médicos Sin Fronteras",
+      "Sistemas BMS",
+      "ThingsBoard",
+      "Grafana",
+      "Node-RED"
+    ]
+  },
+
+  "enlaces": {
+    "_todo": "TODO: el Notion es privado. Para que lo vea alguien de fuera del equipo, activar 'Publicar en la web' en Notion y pegar aquí la URL pública.",
+    "notion": "https://app.notion.com/p/3ed09b9060ac8164be89d91fb4c22605",
+    "githubProjects": "",
+    "repositorio": "https://github.com/JP-Aceves/OMERO-HOSPITAL",
+    "carpetaCompartida": ""
+  },
+
+  "estado": {
+    "sprintActual": 0,
+    "fase": "S1",
+    "mensaje": ""
+  },
+
+  "capacidades": [
+    { "verbo": "Recoge", "texto": "Lecturas de sensores por zona." },
+    { "verbo": "Muestra", "texto": "A cada rol la información que le corresponde." },
+    { "verbo": "Genera alertas", "texto": "Por umbrales con semáforo verde / amarillo / rojo." },
+    { "verbo": "Actúa", "texto": "Sobre ventilador y LEDs (automático o manual según rol)." },
+    { "verbo": "Predice", "texto": "Por regresión lineal cuándo se vacía el depósito." }
+  ],
+
+  "flujoAlerta": [
+    { "paso": "Lectura", "detalle": "Sensor por zona" },
+    { "paso": "Umbral", "detalle": "Valores provisionales" },
+    { "paso": "Alerta", "detalle": "Fuera de rango" },
+    { "paso": "Semáforo", "detalle": "Verde / amarillo / rojo" },
+    { "paso": "Actuador", "detalle": "Ventilador y LEDs" }
+  ],
+
+  "funcionalidades": [
+    "Login único para todos los roles y vista de registro",
+    "Dashboard distinto por rol",
+    "Lecturas por zona",
+    "Alertas con semáforo",
+    "Histórico y gráficas de evolución",
+    "Estadísticas (media, máximo, mínimo)",
+    "Predicción por regresión lineal",
+    "Control de ventilador y LEDs",
+    "Interfaz responsive"
+  ],
+
+  "roles": [
+    {
+      "nombre": "Jefe de sanidad",
+      "detalle": "",
+      "descripcion": "Vista global de todas las zonas, alertas, histórico, predicciones, gestión de usuarios y asignaciones.",
+      "sensores": ["Todos"]
+    },
+    {
+      "nombre": "Responsable de carpa",
+      "detalle": "Médico / enfermería",
+      "descripcion": "Condiciones de su carpa, alertas, estado del ventilador y de la luz.",
+      "sensores": ["DHT22", "MQ-135", "LDR"]
+    },
+    {
+      "nombre": "Técnico de logística",
+      "detalle": "",
+      "descripcion": "Nivel de depósitos, humo/gas, viento, control manual de ventilador y LEDs.",
+      "sensores": ["MQ-2", "HC-SR04", "Anemómetro"]
+    }
+  ],
+  "reglaNegocio": "Cada sensor pertenece a una zona, cada zona tiene un usuario responsable y el jefe de sanidad ve el conjunto.",
+
+  "zonas": [
+    { "id": "carpa", "nombre": "Carpa de hospitalización", "contenido": "DHT22 + MQ-135 + LDR + ventilador + LED de estado" },
+    { "id": "tecnica", "nombre": "Zona técnica", "detalle": "Generador y depósitos", "contenido": "MQ-2 + HC-SR04 + LED de estado" },
+    { "id": "exterior", "nombre": "Exterior del campamento", "contenido": "Anemómetro" },
+    { "id": "pasillo", "nombre": "Pasillo / salida", "contenido": "Tira LED de evacuación y emergencia" }
+  ],
+
+  "componentes": [
+    { "nombre": "ESP32", "tipo": "Microcontrolador", "zonaTexto": "Todas", "zonas": ["carpa", "tecnica", "exterior", "pasillo"], "uso": "Nodo de cada módulo: lee sensores, controla actuadores y (S2) envía por WiFi/MQTT", "alerta": "Nodo desconectado" },
+    { "nombre": "DHT22", "tipo": "Sensor", "zonaTexto": "Carpa", "zonas": ["carpa"], "uso": "Temperatura y humedad de la carpa", "alerta": "Temperatura alta, humedad fuera de rango" },
+    { "nombre": "MQ-2", "tipo": "Sensor", "zonaTexto": "Zona técnica", "zonas": ["tecnica"], "uso": "Humo o fuga de gas junto a generador y combustible", "alerta": "Humo/gas → evacuación" },
+    { "nombre": "MQ-135", "tipo": "Sensor", "zonaTexto": "Carpa", "zonas": ["carpa"], "uso": "Calidad del aire (aire viciado por ocupación)", "alerta": "Aire de mala calidad → ventilar" },
+    { "nombre": "HC-SR04", "tipo": "Sensor", "zonaTexto": "Zona técnica", "zonas": ["tecnica"], "uso": "Nivel del depósito (mide desde arriba)", "alerta": "Depósito bajo" },
+    { "nombre": "Anemómetro digital", "tipo": "Sensor", "zonaTexto": "Exterior", "zonas": ["exterior"], "uso": "Velocidad del viento, riesgo estructural para las carpas", "alerta": "Viento fuerte → asegurar o evacuar" },
+    { "nombre": "LDR (fotorresistor)", "tipo": "Sensor", "zonaTexto": "Carpa", "zonas": ["carpa"], "uso": "Luz dentro de la carpa, detecta corte por fallo del generador", "alerta": "Sin luz → iluminación de emergencia" },
+    { "nombre": "Ventilador 5V", "tipo": "Actuador", "zonaTexto": "Carpa", "zonas": ["carpa"], "uso": "Ventilación automática por temperatura o aire, o manual", "alerta": "ON/OFF" },
+    { "nombre": "LEDs / tira LED", "tipo": "Actuador", "zonaTexto": "Todas / pasillo", "zonas": ["carpa", "tecnica", "exterior", "pasillo"], "uso": "Semáforo por zona, ruta de evacuación, luz de emergencia", "alerta": "Refleja la alerta" }
+  ],
+  "notaUmbrales": "Los valores exactos de los umbrales todavía están por cerrar (provisionales).",
+
+  "componentesDescartados": [
+    { "nombre": "Caudalímetro", "motivo": "Requiere agua circulando; el HC-SR04 ya cubre el depósito." },
+    { "nombre": "Motor DC 12V", "motivo": "Fuente y driver aparte; el ventilador ya es actuador." },
+    { "nombre": "Cámara OV2640", "motivo": "Complejidad y privacidad." }
+  ],
+
+  "arquitectura": {
+    "patron": "Modelo-Vista-Controlador, todo en Python",
+    "regla": "Las vistas nunca acceden directamente a los ficheros.",
+    "capas": [
+      { "nombre": "Vista", "descripcion": "Solo muestra datos y captura eventos." },
+      { "nombre": "Controlador", "descripcion": "Coordina vistas, servicios y modelo." },
+      { "nombre": "Servicios", "descripcion": "Lógica reutilizable: alertas, estadística, simulador." },
+      { "nombre": "Modelo", "descripcion": "Clases del dominio." },
+      { "nombre": "Persistencia", "descripcion": "Lee y escribe JSON." }
+    ],
+    "modelo": [
+      "Usuario (abstracta) → JefeSanidad, ResponsableCarpa, TecnicoLogistica",
+      "Sensor (abstracta) → 6 subclases",
+      "Actuador (abstracta) → Ventilador, IndicadorLED",
+      "Zona agrega sensores y actuadores",
+      "Lectura, Alerta, Umbral",
+      "ListaEnlazada / Nodo propias"
+    ],
+    "carpetas": "omero_hospital/\n├── main.py\n├── model/         usuarios, sensores, actuadores, estructuras (ListaEnlazada), dominio\n├── view/          una vista por pantalla/rol\n├── controller/    un controlador por vista\n├── service/       alertas, estadistica, simulador\n├── persistence/   repositorio_json\n└── assets/        estilos OMERO, iconos\ndata/   tests/   docs/",
+    "stack": [
+      { "fase": "S1", "items": ["Python 3.12", "PySide6 (Qt)", "Matplotlib", "json estándar", "pytest"] },
+      { "fase": "S2", "items": ["ESP32 (MicroPython)", "MQTT (paho-mqtt)", "Base de datos SQL en servidor"] }
+    ],
+    "ejemploLectura": {
+      "idSensor": "MQ135-CARPA1",
+      "zona": "CARPA1",
+      "tipo": "CALIDAD_AIRE",
+      "valor": 412,
+      "unidad": "ppm_aprox",
+      "timestamp": "2026-10-05T10:15:00"
+    }
+  },
+
+  "sprints": [
+    {
+      "numero": 0,
+      "nombre": "Anteproyecto",
+      "fechaInicio": "2026-10-05",
+      "fechaFin": "2026-10-18",
+      "entregable": "Anteproyecto + Product Backlog + Mockups",
+      "estado": "en-curso",
+      "provisional": false,
+      "puntosTotales": 43,
+      "puntosHechos": null,
+      "tareas": [
+        { "id": "OME-1", "titulo": "Estructura inicial del repositorio", "puntos": 1, "estado": "pendiente" },
+        { "id": "OME-14", "titulo": "Historias de usuario", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-2", "titulo": "Planteamiento y propuesta", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-15", "titulo": "Matriz de requisitos", "puntos": 2, "estado": "pendiente" },
+        { "id": "OME-3", "titulo": "Estado del arte", "puntos": 5, "estado": "pendiente" },
+        { "id": "OME-4", "titulo": "Objetivos", "puntos": 2, "estado": "pendiente" },
+        { "id": "OME-5", "titulo": "Análisis de ODS", "puntos": 1, "estado": "pendiente" },
+        { "id": "OME-6", "titulo": "Diagrama de casos de uso", "puntos": 2, "estado": "pendiente" },
+        { "id": "OME-9", "titulo": "Mockups login y registro", "puntos": 2, "estado": "pendiente" },
+        { "id": "OME-16", "titulo": "Diagrama de actividad", "puntos": 2, "estado": "pendiente" },
+        { "id": "OME-7", "titulo": "Diagrama de clases MVC", "puntos": 5, "estado": "pendiente" },
+        { "id": "OME-10", "titulo": "Mockups de los 3 dashboards", "puntos": 5, "estado": "pendiente" },
+        { "id": "OME-11", "titulo": "Presupuesto", "puntos": 2, "estado": "pendiente" },
+        { "id": "OME-8", "titulo": "Diagramas de secuencia (opcional)", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-12", "titulo": "Rehacer backlog Sprints 1 a 4", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-17", "titulo": "Diagrama de Gantt", "puntos": 2, "estado": "pendiente" },
+        { "id": "OME-13", "titulo": "Acta del Sprint 0", "puntos": 1, "estado": "pendiente" }
+      ]
+    },
+    {
+      "numero": 1,
+      "nombre": "Estructura base y autenticación",
+      "fechaInicio": "2026-10-19",
+      "fechaFin": "2026-11-01",
+      "entregable": "Estructura base y autenticación",
+      "estado": "pendiente",
+      "provisional": true,
+      "puntosTotales": 17,
+      "puntosHechos": null,
+      "tareas": [
+        { "id": "OME-20", "titulo": "Proyecto Python + PySide6 con MVC", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-21", "titulo": "Modelo de usuarios", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-22", "titulo": "Repositorio JSON de usuarios", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-23", "titulo": "Login con redirección por rol", "puntos": 5, "estado": "pendiente" },
+        { "id": "OME-24", "titulo": "Vista de registro", "puntos": 3, "estado": "pendiente" }
+      ]
+    },
+    {
+      "numero": 2,
+      "nombre": "Gestión de datos (CRUD) y simulador",
+      "fechaInicio": "2026-11-02",
+      "fechaFin": "2026-11-15",
+      "entregable": "Gestión de datos (CRUD) y simulador",
+      "estado": "pendiente",
+      "provisional": true,
+      "puntosTotales": 16,
+      "puntosHechos": null,
+      "tareas": [
+        { "id": "OME-30", "titulo": "Lista enlazada", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-31", "titulo": "Modelo de Zona, Sensor y Lectura", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-32", "titulo": "CRUD de zonas y sensores", "puntos": 5, "estado": "pendiente" },
+        { "id": "OME-33", "titulo": "Simulador de lecturas", "puntos": 5, "estado": "pendiente" }
+      ]
+    },
+    {
+      "numero": 3,
+      "nombre": "Lógica de negocio, dashboards, alertas y estadística",
+      "fechaInicio": "2026-11-16",
+      "fechaFin": "2026-11-29",
+      "entregable": "Lógica de negocio, dashboards, alertas y estadística",
+      "estado": "pendiente",
+      "provisional": true,
+      "puntosTotales": 24,
+      "puntosHechos": null,
+      "tareas": [
+        { "id": "OME-40", "titulo": "Dashboard Jefe de sanidad", "puntos": 5, "estado": "pendiente" },
+        { "id": "OME-41", "titulo": "Dashboard Responsable de carpa", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-42", "titulo": "Dashboard Técnico de logística", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-43", "titulo": "Umbrales y alertas", "puntos": 5, "estado": "pendiente" },
+        { "id": "OME-44", "titulo": "Histórico y gráficas", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-45", "titulo": "Regresión lineal del depósito", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-46", "titulo": "Control de ventilador y LEDs", "puntos": 2, "estado": "pendiente" }
+      ]
+    },
+    {
+      "numero": 4,
+      "nombre": "Optimización y entrega final",
+      "fechaInicio": "2026-11-30",
+      "fechaFin": "2026-12-13",
+      "entregable": "Optimización y entrega final",
+      "estado": "pendiente",
+      "provisional": true,
+      "puntosTotales": 19,
+      "puntosHechos": null,
+      "tareas": [
+        { "id": "OME-50", "titulo": "Interfaz responsive", "puntos": 3, "estado": "pendiente" },
+        { "id": "OME-51", "titulo": "Pruebas y corrección de errores", "puntos": 5, "estado": "pendiente" },
+        { "id": "OME-52", "titulo": "Memoria final", "puntos": 8, "estado": "pendiente" },
+        { "id": "OME-53", "titulo": "Preparación de la defensa", "puntos": 3, "estado": "pendiente" }
+      ]
+    }
+  ],
+
+  "fasesS2": [
+    "Anteproyecto S2 + Product Backlog de la fase 2",
+    "Pruebas de componentes y estructura física de la maqueta",
+    "Integración de la maqueta y lógica local de los microcontroladores",
+    "Diseño y despliegue del servidor de BBDD",
+    "Conexión con el dashboard y persistencia de datos",
+    "Configuración del bróker MQTT y transmisión de datos",
+    "Sistema end-to-end y optimización final"
+  ],
+  "cierreS2": "Defensa oral, vídeo de 2 a 3 minutos y póster.",
+
+  "calendario": [
+    { "fecha": "2026-09-09", "titulo": "Presentación de la asignatura", "tipo": "Hito" },
+    { "fecha": "2026-09-16", "titulo": "Formación de grupos + imagen de empresa", "tipo": "Entrega" },
+    { "fecha": "2026-09-25", "titulo": "Seminario 1: SCRUM", "tipo": "Clase" },
+    { "fecha": "2026-10-02", "titulo": "Seminario 2: GitHub", "tipo": "Clase" },
+    { "fecha": "2026-10-07", "titulo": "Selección de IDE (Round Table)", "tipo": "Clase" },
+    { "fecha": "2026-10-14", "titulo": "Taller práctico: JSON", "tipo": "Clase" },
+    { "fecha": "2026-10-18", "titulo": "Anteproyecto + Product Backlog + Mockups", "tipo": "Entrega" },
+    { "fecha": "2026-11-01", "titulo": "Entrega Sprint 1", "tipo": "Entrega" },
+    { "fecha": "2026-11-15", "titulo": "Entrega Sprint 2", "tipo": "Entrega" },
+    { "fecha": "2026-11-18", "titulo": "Checkpoint 1", "tipo": "Revisión" },
+    { "fecha": "2026-11-29", "titulo": "Entrega Sprint 3", "tipo": "Entrega" },
+    { "fecha": "2026-12-13", "titulo": "Entrega Sprint 4", "tipo": "Entrega" },
+    { "fecha": "2026-12-16", "titulo": "Checkpoint 2", "tipo": "Revisión" },
+    { "fecha": "2026-12-20", "titulo": "Entrega tardía de producto (último plazo)", "tipo": "Entrega" },
+    { "fecha": "2027-01-20", "titulo": "Presentación pública final", "tipo": "Defensa" }
+  ],
+  "contenidoEntregaSprint": [
+    "El proyecto",
+    "Las actas del sprint",
+    "El informe de autoevaluación por pares",
+    "La documentación del sprint"
+  ],
+
+  "festivos": [
+    { "desde": "2026-10-12", "hasta": "2026-10-12" },
+    { "desde": "2026-11-02", "hasta": "2026-11-02" },
+    { "desde": "2026-11-09", "hasta": "2026-11-09" },
+    { "desde": "2026-12-07", "hasta": "2026-12-08" },
+    { "desde": "2026-12-23", "hasta": "2027-01-05" }
+  ],
+
+  "empresa": {
+    "nombre": "OMERO",
+    "tipo": "Software consulting",
+    "descripcion": "4 integrantes fundadores en igualdad de condiciones (Acta N.º 001, 18 sep 2026). Decisiones por consenso o, si no, mayoría simple; todo queda en acta. Clientes: los profesores.",
+    "metodologia": "Sprints de 2 semanas, Planning, daily asíncrona (lunes, miércoles y viernes), Review y Retrospectiva. Todos forman parte del equipo de desarrollo, PO y SM incluidos, y todos hacen commits en todos los sprints."
+  },
+
+  "equipo": [
+    { "nombre": "Alejandro Medina", "github": "" },
+    { "nombre": "Jose Aceves", "github": "JP-Aceves" },
+    { "nombre": "Alejandro Rodas", "github": "" },
+    { "nombre": "Ivan Sanz", "github": "" }
+  ],
+
+  "rotacionScrum": [
+    { "sprint": 0, "productOwner": "Jose Aceves", "scrumMaster": "Alejandro Medina" },
+    { "sprint": 1, "productOwner": "Alejandro Medina", "scrumMaster": "Alejandro Rodas" },
+    { "sprint": 2, "productOwner": "Alejandro Rodas", "scrumMaster": "Ivan Sanz" },
+    { "sprint": 3, "productOwner": "Ivan Sanz", "scrumMaster": "Jose Aceves" },
+    { "sprint": 4, "productOwner": "Jose Aceves", "scrumMaster": "Alejandro Medina" }
+  ],
+
+  "decisiones": [
+    { "fecha": "2026-09-30", "decision": "Dashboard de un barrio en zona crítica", "estado": "Descartada", "motivo": "Idea inicial de clase" },
+    { "fecha": "2026-09-30", "decision": "Cambio a hospital", "estado": "Aceptada", "motivo": "Elegido por el equipo" },
+    { "fecha": "2026-09-30", "decision": "Hospital de campaña en zona crítica", "estado": "Aceptada", "motivo": "Frente al hospital genérico (19 frente a 29 puntos de dificultad): cada sensor tiene un porqué y es más defendible" },
+    { "fecha": "2026-09-30", "decision": "Supervisar entorno, riesgos y recursos, no constantes vitales", "estado": "Aceptada", "motivo": "Los componentes son ambientales" },
+    { "fecha": "2026-09-30", "decision": "Componentes: ESP32, DHT22, MQ-2, MQ-135, HC-SR04, anemómetro, LDR, ventilador 5V, LEDs", "estado": "Aceptada", "motivo": "Cubren carpa, zona técnica y exterior" },
+    { "fecha": "2026-09-30", "decision": "Descartar caudalímetro, motor DC 12V y cámara", "estado": "Aceptada", "motivo": "Complejidad, redundancia y privacidad" },
+    { "fecha": "2026-10-01", "decision": "Python con PySide6", "estado": "Aceptada", "motivo": "Decisión del equipo" },
+    { "fecha": "2026-10-01", "decision": "GitHub con merge commits, sin squash", "estado": "Aceptada", "motivo": "Conservar los commits individuales que se evalúan" },
+    { "fecha": "2026-10-02", "decision": "Gestión SCRUM en Notion", "estado": "Aceptada", "motivo": "Todo el proyecto en un solo sitio" }
+  ],
+
+  "pendientes": [
+    "Umbrales definitivos de alerta.",
+    "Qué roles pueden activar el ventilador.",
+    "Uso final del HC-SR04: depósito de agua o de combustible."
+  ],
+
+  "ods": [
+    { "numero": 3, "nombre": "Salud y bienestar", "texto": "Protege a pacientes y personal." },
+    { "numero": 9, "nombre": "Industria, innovación e infraestructura", "texto": "IoT ligero y barato para infraestructura temporal." },
+    { "numero": 11, "nombre": "Ciudades y comunidades sostenibles", "texto": "Resiliencia ante catástrofes." },
+    { "numero": 16, "nombre": "Paz, justicia e instituciones sólidas", "texto": "Apoyo a despliegues humanitarios y en zonas de conflicto." }
+  ],
+
+  "galeria": [
+    { "tipo": "Mockup", "titulo": "Login", "src": "assets/img/01_login.png", "thumb": "assets/img/thumbs/01_login.jpg", "alt": "Mockup de la pantalla de inicio de sesión de OMERO" },
+    { "tipo": "Mockup", "titulo": "Registro", "src": "assets/img/02_registro.png", "thumb": "assets/img/thumbs/02_registro.jpg", "alt": "Mockup de la pantalla de registro de usuario" },
+    { "tipo": "Mockup", "titulo": "Dashboard Jefe de sanidad", "src": "assets/img/03_jefe.png", "thumb": "assets/img/thumbs/03_jefe.jpg", "alt": "Mockup del dashboard del jefe de sanidad" },
+    { "tipo": "Mockup", "titulo": "Dashboard Responsable de carpa", "src": "assets/img/04_carpa.png", "thumb": "assets/img/thumbs/04_carpa.jpg", "alt": "Mockup del dashboard del responsable de carpa" },
+    { "tipo": "Mockup", "titulo": "Dashboard Técnico de logística", "src": "assets/img/05_logistica.png", "thumb": "assets/img/thumbs/05_logistica.jpg", "alt": "Mockup del dashboard del técnico de logística" },
+    { "tipo": "Diagrama", "titulo": "Casos de uso", "src": "assets/img/cu.png", "thumb": "assets/img/thumbs/cu.jpg", "alt": "Diagrama UML de casos de uso" },
+    { "tipo": "Diagrama", "titulo": "Clases", "src": "assets/img/clases.png", "thumb": "assets/img/thumbs/clases.jpg", "alt": "Diagrama UML de clases" },
+    { "tipo": "Diagrama", "titulo": "Arquitectura MVC", "src": "assets/img/mvc.png", "thumb": "assets/img/thumbs/mvc.jpg", "alt": "Diagrama de la arquitectura Modelo-Vista-Controlador" },
+    { "tipo": "Diagrama", "titulo": "Actividad 1: login con redirección por rol", "src": "assets/img/act1.png", "thumb": "assets/img/thumbs/act1.jpg", "alt": "Diagrama de actividad del login con redirección por rol" },
+    { "tipo": "Diagrama", "titulo": "Actividad 2: lectura → umbral → alerta", "src": "assets/img/act2.png", "thumb": "assets/img/thumbs/act2.jpg", "alt": "Diagrama de actividad del flujo lectura, umbral y alerta" },
+    { "tipo": "Diagrama", "titulo": "Gantt", "src": "assets/img/gantt.png", "thumb": "assets/img/thumbs/gantt.jpg", "alt": "Diagrama de Gantt del primer semestre" }
+  ],
+
+  "asignatura": {
+    "nombre": "Proyecto de Informática I (6 ECTS, S3) + Proyecto de Informática II",
+    "grado": "Grado en Ingeniería Informática",
+    "universidad": "Universidad Europea de Madrid",
+    "curso": "2026-27",
+    "docente": "Jorge García González",
+    "descripcion": "Proyecto integrador de dos semestres con memoria escrita y defensa oral ante tribunal."
+  }
+}
