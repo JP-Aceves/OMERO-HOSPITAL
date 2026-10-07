@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OMERO · Monitor de Hospital de Campaña</title>
+  <meta name="description" content="Web del proyecto OMERO: supervisión ambiental, de riesgos y de recursos críticos de un hospital de campaña.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#006ECF">
+  <!-- Aplica el tema guardado antes de pintar para evitar parpadeo -->
+  <script>
+    try { var t = localStorage.getItem('omero-tema'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600&display=swap" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23006ECF'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%2300D4C6' stroke-width='3'/%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip" href="#main">Saltar al contenido</a>
+
+  <header class="topbar" id="top">
+    <div class="topbar__inner wrap">
+      <!-- TODO: sustituir el logotipo tipográfico por el logo real de OMERO cuando esté en web/assets/ -->
+      <a class="logo" href="#hero" aria-label="OMERO, ir al inicio">OMERO</a>
+
+      <nav class="nav" id="nav" aria-label="Secciones">
+        <ul class="nav__list" id="nav-list"></ul>
+      </nav>
+
+      <div class="topbar__actions">
+        <span data-link="notion" data-label="Notion" data-variant="primary" data-size="sm"></span>
+        <span data-link="githubProjects" data-label="GitHub Projects" data-variant="ghost" data-size="sm"></span>
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Cambiar a modo oscuro">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+        <button class="icon-btn nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav" aria-label="Abrir menú">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="load-error" id="load-error" role="alert" hidden></div>
+
+  <main id="main">
+    <!-- 1 · Hero -->
+    <section class="hero" id="hero" aria-labelledby="hero-title">
+      <div class="wrap hero__grid">
+        <div class="hero__copy">
+          <p class="badge" id="sprint-badge"></p>
+          <h1 class="hero__title" id="hero-title" data-bind="proyecto.nombre"></h1>
+          <p class="hero__formal" data-bind="proyecto.titulo"></p>
+          <p class="hero__sub" data-bind="proyecto.subtitulo"></p>
+          <div class="hero__ctas">
+            <span data-link="notion" data-label="Notion" data-variant="primary"></span>
+            <span data-link="githubProjects" data-label="GitHub Projects" data-variant="secondary"></span>
+            <span data-link="repositorio" data-label="Repositorio" data-variant="ghost"></span>
+          </div>
+        </div>
+        <figure class="hero__thesis">
+          <div class="semaforo" aria-hidden="true"><i></i><i></i><i></i></div>
+          <blockquote data-bind="proyecto.tesis"></blockquote>
+          <figcaption id="hero-status"></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 2 · Problema -->
+    <section class="section" id="problema" data-nav="Problema" aria-labelledby="problema-h">
+      <div class="wrap">
+        <p class="eyebrow">01 · Contexto</p>
+        <h2 id="problema-h">El problema</h2>
+        <div class="grid-2">
+          <div class="prose">
+            <p data-bind="proyecto.contexto"></p>
+          </div>
+          <div class="stack">
+            <article class="card card--accent">
+              <h3>Problema</h3>
+              <p data-bind="proyecto.problema"></p>
+            </article>
+            <article class="card">
+              <h3>Pregunta motriz</h3>
+              <p class="question" data-bind="proyecto.pregunta"></p>
+            </article>
+          </div>
+        </div>
+        <div class="grid-2 mt">
+          <article class="card">
+            <h3>Hueco detectado</h3>
+            <p data-bind="proyecto.hueco"></p>
+            <ul class="chips" id="referencias" aria-label="Referencias del estado del arte"></ul>
+          </article>
+          <article class="card">
+            <h3>Alcance</h3>
+            <p data-bind="proyecto.alcance"></p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 · Qué hace -->
+    <section class="section section--tint" id="sistema" data-nav="Sistema" data-requires="capacidades" aria-labelledby="sistema-h">
+      <div class="wrap">
+        <p class="eyebrow">02 · Capacidades</p>
+        <h2 id="sistema-h">Qué hace el sistema</h2>
+        <p class="lead" data-bind="proyecto.resumen"></p>
+        <ol class="verbs" id="capacidades"></ol>
+        <h3 class="sub-h" data-requires="flujoAlerta">Del sensor a la acción</h3>
+        <ol class="flow" id="flujo" aria-label="Flujo de una alerta"></ol>
+        <h3 class="sub-h" data-requires="funcionalidades">Funcionalidades</h3>
+        <ul class="checklist" id="funcionalidades"></ul>
+      </div>
+    </section>
+
+    <!-- 4 · Roles -->
+    <section class="section" id="roles" data-nav="Roles" data-requires="roles" aria-labelledby="roles-h">
+      <div class="wrap">
+        <p class="eyebrow">03 · Usuarios</p>
+        <h2 id="roles-h">Roles de usuario</h2>
+        <div class="grid-3" id="roles-list"></div>
+        <p class="note" id="regla-negocio"></p>
+      </div>
+    </section>
+
+    <!-- 5 · Zonas -->
+    <section class="section section--tint" id="zonas" data-nav="Zonas" data-requires="zonas" aria-labelledby="zonas-h">
+      <div class="wrap">
+        <p class="eyebrow">04 · Maqueta</p>
+        <h2 id="zonas-h">Zonas y componentes</h2>
+        <ol class="grid-4 zones" id="zonas-list"></ol>
+
+        <div class="table-head" data-requires="componentes">
+          <h3 class="sub-h">Componentes</h3>
+          <div class="filters" id="filtros" role="group" aria-label="Filtrar componentes por zona"></div>
+        </div>
+        <div class="table-wrap" data-requires="componentes" tabindex="0" role="region" aria-label="Tabla de componentes">
+          <table class="table table--stack">
+            <thead><tr><th scope="col">Componente</th><th scope="col">Tipo</th><th scope="col">Zona</th><th scope="col">Uso</th><th scope="col">Alerta</th></tr></thead>
+            <tbody id="componentes"></tbody>
+          </table>
+        </div>
+        <p class="note note--warn" id="nota-umbrales"></p>
+
+        <div data-requires="componentesDescartados">
+          <h3 class="sub-h">Descartados</h3>
+          <ul class="grid-3 discarded" id="descartados"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 · Arquitectura -->
+    <section class="section" id="arquitectura" data-nav="Arquitectura" data-requires="arquitectura" aria-labelledby="arq-h">
+      <div class="wrap">
+        <p class="eyebrow">05 · Técnica</p>
+        <h2 id="arq-h">Arquitectura y stack</h2>
+        <p class="lead"><strong data-bind="arquitectura.patron"></strong>. <span data-bind="arquitectura.regla"></span></p>
+        <div class="grid-2">
+          <div>
+            <h3 class="sub-h">Capas</h3>
+            <ol class="layers" id="capas"></ol>
+            <h3 class="sub-h">Modelo de dominio</h3>
+            <ul class="plain-list" id="modelo"></ul>
+          </div>
+          <div>
+            <h3 class="sub-h">Estructura de carpetas</h3>
+            <pre class="code" tabindex="0"><code id="carpetas"></code></pre>
+            <h3 class="sub-h">Formato de una lectura</h3>
+            <pre class="code" tabindex="0"><code id="ejemplo-lectura"></code></pre>
+          </div>
+        </div>
+        <h3 class="sub-h">Stack</h3>
+        <div class="grid-2" id="stack"></div>
+      </div>
+    </section>
+
+    <!-- 7 · Roadmap -->
+    <section class="section section--tint" id="roadmap" data-nav="Roadmap" data-requires="sprints" aria-labelledby="roadmap-h">
+      <div class="wrap">
+        <p class="eyebrow">06 · Planificación</p>
+        <h2 id="roadmap-h">Roadmap</h2>
+        <h3 class="sub-h">Primer semestre · Sprints</h3>
+        <ol class="timeline" id="sprints"></ol>
+        <div data-requires="fasesS2">
+          <h3 class="sub-h">Segundo semestre · Fases</h3>
+          <ol class="phases" id="fases-s2"></ol>
+          <p class="note" id="cierre-s2"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 · Calendario -->
+    <section class="section" id="calendario" data-nav="Calendario" data-requires="calendario" aria-labelledby="cal-h">
+      <div class="wrap">
+        <p class="eyebrow">07 · Fechas</p>
+        <h2 id="cal-h">Calendario oficial</h2>
+        <div class="grid-cal">
+          <aside class="countdown card" id="countdown" aria-live="polite"></aside>
+          <ol class="cal-list" id="cal-list"></ol>
+        </div>
+        <div class="grid-2 mt">
+          <div class="card" data-requires="contenidoEntregaSprint">
+            <h3>En cada entrega de sprint</h3>
+            <ul class="checklist checklist--compact" id="contenido-entrega"></ul>
+          </div>
+          <div class="card" data-requires="festivos">
+            <h3>Festivos</h3>
+            <ul class="chips" id="festivos"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 · Equipo -->
+    <section class="section section--tint" id="equipo" data-nav="Equipo" data-requires="equipo" aria-labelledby="equipo-h">
+      <div class="wrap">
+        <p class="eyebrow">08 · Personas</p>
+        <h2 id="equipo-h">Equipo y roles SCRUM</h2>
+        <p class="lead" id="empresa"></p>
+        <ul class="grid-4 team" id="equipo-list"></ul>
+        <div data-requires="rotacionScrum">
+          <h3 class="sub-h">Rotación de Product Owner y Scrum Master</h3>
+          <div class="table-wrap" tabindex="0" role="region" aria-label="Rotación de roles SCRUM">
+            <table class="table">
+              <thead><tr><th scope="col">Sprint</th><th scope="col">Product Owner</th><th scope="col">Scrum Master</th></tr></thead>
+              <tbody id="rotacion"></tbody>
+            </table>
+          </div>
+        </div>
+        <p class="note" data-bind="empresa.metodologia"></p>
+      </div>
+    </section>
+
+    <!-- 10 · Diseño -->
+    <section class="section" id="diseno" data-nav="Diseño" data-requires="galeria" aria-labelledby="diseno-h">
+      <div class="wrap">
+        <p class="eyebrow">09 · Diseño</p>
+        <h2 id="diseno-h">Mockups y diagramas</h2>
+        <div id="galeria"></div>
+      </div>
+    </section>
+
+    <!-- 11 · Decisiones -->
+    <section class="section section--tint" id="decisiones" data-nav="Decisiones" data-requires="decisiones" aria-labelledby="dec-h">
+      <div class="wrap">
+        <p class="eyebrow">10 · Registro</p>
+        <h2 id="dec-h">Decisiones</h2>
+        <ol class="decisions" id="decisiones-list"></ol>
+        <div class="card card--open mt" data-requires="pendientes">
+          <h3><span class="dot dot--amber" aria-hidden="true"></span> Abierto · pendiente de decidir</h3>
+          <ul class="plain-list" id="pendientes"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12 · ODS -->
+    <section class="section" id="ods" data-nav="ODS" data-requires="ods" aria-labelledby="ods-h">
+      <div class="wrap">
+        <p class="eyebrow">11 · Impacto</p>
+        <h2 id="ods-h">Objetivos de Desarrollo Sostenible</h2>
+        <ul class="grid-4 ods" id="ods-list"></ul>
+      </div>
+    </section>
+
+    <!-- 13 · Enlaces -->
+    <section class="section section--tint" id="enlaces" data-nav="Enlaces" aria-labelledby="enl-h">
+      <div class="wrap">
+        <p class="eyebrow">12 · Recursos</p>
+        <h2 id="enl-h">Enlaces</h2>
+        <div class="grid-4 links" id="enlaces-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__grid">
+      <div>
+        <p class="logo logo--footer">OMERO</p>
+        <p class="footer__meta" id="footer-asignatura"></p>
+      </div>
+      <div class="footer__right">
+        <p id="footer-update"></p>
+        <a href="#top" class="footer__top">Volver arriba ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <dialog class="lightbox" id="lightbox" aria-labelledby="lb-title">
+    <div class="lightbox__bar">
+      <p id="lb-title"></p>
+      <div class="lightbox__ctrl">
+        <button type="button" class="icon-btn" id="lb-prev" aria-label="Imagen anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button type="button" class="icon-btn" id="lb-next" aria-label="Imagen siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button type="button" class="icon-btn" id="lb-close" aria-label="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+    </div>
+    <img id="lb-img" alt="">
+  </dialog>
+
+  <script src="js/app.js" defer></script>
+</body>
+</html>
