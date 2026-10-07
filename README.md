@@ -6,6 +6,16 @@ Proyecto integrador de **Proyecto de Informática I y II**, Grado en Ingeniería
 
 ---
 
+## Web del proyecto
+
+**https://jp-aceves.github.io/OMERO-HOSPITAL/**
+
+Web estática en [`web/`](web/) (HTML + CSS + JS, sin build). Todo el contenido sale de [`web/data/proyecto.json`](web/data/proyecto.json) y se publica sola con GitHub Actions al hacer push a `develop` o `main`. Cómo actualizarla: [`web/ACTUALIZAR.md`](web/ACTUALIZAR.md).
+
+Verla en local: `cd web && python3 -m http.server` y abrir http://localhost:8000.
+
+---
+
 ## Funcionalidades
 
 - Login único para todos los roles y vista de registro.
