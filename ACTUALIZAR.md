@@ -87,7 +87,7 @@ Ojo: `03_jefe.png`, `04_carpa.png` y `05_logistica.png` también salen en el her
 
 Un enlace vacío (`""`) se muestra como botón deshabilitado **"Próximamente"**. La carpeta compartida solo aparece en "Enlaces" cuando tiene URL.
 
-> **Notion es privado.** Para que lo vea alguien de fuera del equipo: en Notion → Compartir → *Publicar en la web*, y pega aquí la URL pública.
+> Usad siempre el enlace **público** de Notion (`...notion.site/...`), no el de `app.notion.com`, que solo funciona para miembros del espacio.
 
 ## e) Fecha de "Última actualización"
 
