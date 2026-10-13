@@ -51,7 +51,7 @@ En la primera iteración (S1) las lecturas se **simulan** y se guardan en JSON. 
 ## Tecnologías
 
 - Python 3.12
-- PySide6 (Qt for Python) para la interfaz gráfica
+- Flet para la interfaz gráfica
 - Matplotlib para las gráficas
 - `json` de la librería estándar para la persistencia
 - pytest para las pruebas
