@@ -6,8 +6,9 @@ Proyecto integrador de **Proyecto de Informática I y II**, Grado en Ingeniería
 
 ---
 
-> Landing Page:
-> Notion Workspace: https://learningresourcess.notion.site/Proyecto-de-Inform-tica-OMERO-Hospital-de-campa-a-3ed09b9060ac8164be89d91fb4c22605?source=copy_link
+> - **Landing Page:** [jp-aceves.github.io/OMERO-HOSPITAL](https://jp-aceves.github.io/OMERO-HOSPITAL/)
+> - **Notion Workspace:** [Proyecto de Informática · OMERO](https://learningresourcess.notion.site/Proyecto-de-Inform-tica-OMERO-Hospital-de-campa-a-3ed09b9060ac8164be89d91fb4c22605)
+> - **GitHub Projects:** [Tablero del proyecto](https://github.com/users/JP-Aceves/projects/3/views/1)
 
 ---
 
