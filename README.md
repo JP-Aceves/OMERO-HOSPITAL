@@ -6,6 +6,11 @@ Proyecto integrador de **Proyecto de Informática I y II**, Grado en Ingeniería
 
 ---
 
+> Landing Page:
+> Notion Workspace: https://learningresourcess.notion.site/Proyecto-de-Inform-tica-OMERO-Hospital-de-campa-a-3ed09b9060ac8164be89d91fb4c22605?source=copy_link
+
+---
+
 ## Funcionalidades
 
 - Login único para todos los roles y vista de registro.
@@ -68,7 +73,7 @@ En la primera iteración (S1) las lecturas se **simulan** y se guardan en JSON. 
 
 | Nombre | GitHub |
 |---|---|
-| Alejandro Medina | @usuario |
+| Alejandro Medina | @roca200300 |
 | Jose Aceves | @JP-Aceves |
 | Alejandro Rodas | @usuario |
 | Ivan Sanz | @usuario |
