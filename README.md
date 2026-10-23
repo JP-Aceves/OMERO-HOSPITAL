@@ -77,7 +77,7 @@ En la primera iteración (S1) las lecturas se **simulan** y se guardan en JSON. 
 | Alejandro Medina | @roca200300 |
 | Jose Aceves | @JP-Aceves |
 | Alejandro Rodas | @usuario |
-| Ivan Sanz | @usuario |
+| Ivan Sanz | @ivansnzlpz |
 
 Docente: Jorge García González
 
