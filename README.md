@@ -62,9 +62,38 @@ En la primera iteración (S1) las lecturas se **simulan** y se guardan en JSON. 
 - Python 3.12 o superior
 - IDE recomendado: PyCharm o VS Code
 
+## Instalación y arranque
+
+```bash
+git clone https://github.com/JP-Aceves/OMERO-HOSPITAL.git
+cd OMERO-HOSPITAL
+python3 -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
+```
+
+La primera vez que se ejecuta, Flet descarga su aplicación de escritorio y tarda un poco.
+
+Tests: `pytest`
+
+## Estructura
+
+| Carpeta | Qué va dentro |
+|---|---|
+| `model/` | Clases del dominio (Usuario, Nodo, ListaEnlazada) |
+| `view/` | Pantallas de Flet. Nunca leen el JSON directamente |
+| `controller/` | Reciben eventos de las vistas y coordinan |
+| `service/` | Lógica reutilizable (simulador, alertas, estadística) |
+| `persistence/` | Lectura y escritura de los JSON |
+| `data/` | Ficheros JSON |
+| `tests/` | Pruebas con pytest |
+
+Normas de trabajo con Git: ver [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Roadmap S1
 
-- [ ] Sprint 0 · Anteproyecto, Product Backlog y mockups
+- [x] Sprint 0 · Anteproyecto, Product Backlog y mockups
 - [ ] Sprint 1 · Estructura base y autenticación
 - [ ] Sprint 2 · Gestión de datos (CRUD) y simulador de sensores
 - [ ] Sprint 3 · Dashboards, alertas y estadística
@@ -76,7 +105,7 @@ En la primera iteración (S1) las lecturas se **simulan** y se guardan en JSON. 
 |---|---|
 | Alejandro Medina | @roca200300 |
 | Jose Aceves | @JP-Aceves |
-| Alejandro Rodas | @usuario |
+| Alejandro Rodas | @AlejandroRodasSamblasUniversidadEuropea |
 | Ivan Sanz | @ivansnzlpz |
 
 Docente: Jorge García González
