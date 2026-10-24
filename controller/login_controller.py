@@ -10,4 +10,10 @@ class LoginController:
 
     def login(self, usuario: str, contrasena: str) -> Usuario | None:
         """Devuelve el Usuario si las credenciales son correctas, o None."""
-        raise NotImplementedError("OME-23")
+        encontrado = self.repositorio.buscar_por_usuario(usuario)
+        if encontrado is None:
+            return None
+
+        if encontrado.verificar_password(contrasena):
+            return encontrado
+        return None
