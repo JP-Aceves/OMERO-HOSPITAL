@@ -1,0 +1,3 @@
+Nombre: Jose Aceves
+Tarea: OME-27 · Actualizar Product Backlog y requisitos
+Sprint: 1
