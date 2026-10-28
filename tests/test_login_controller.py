@@ -18,7 +18,9 @@ def test_login_correcto_devuelve_el_usuario(tmp_path):
 
     resultado = controlador.login("ana", "omero123")
 
-    assert resultado is usuario
+    assert resultado is not None
+    assert resultado.usuario == "ana"
+    assert resultado.ROL == "jefe_sanidad"
 
 
 def test_login_con_contrasena_incorrecta_devuelve_none(tmp_path):
