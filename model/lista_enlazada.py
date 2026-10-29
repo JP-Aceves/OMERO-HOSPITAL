@@ -30,7 +30,21 @@ class ListaEnlazada:
 
     def eliminar(self, condicion) -> bool:
         """Elimina el primer dato que cumple condicion(dato). True si eliminó algo."""
-        raise NotImplementedError("OME-30")
+        anterior = None
+        actual = self.cabeza
+        while actual is not None:
+            if condicion(actual.dato):
+                if anterior is None:
+                    self.cabeza = actual.siguiente
+                else:
+                    anterior.siguiente = actual.siguiente
+                if actual is self._cola:
+                    self._cola = anterior
+                self._tamano -= 1
+                return True
+            anterior = actual
+            actual = actual.siguiente
+        return False
 
     def __len__(self) -> int:
         return self._tamano
