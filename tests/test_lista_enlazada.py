@@ -33,3 +33,16 @@ def test_se_puede_recorrer_varias_veces():
     lista = lista_con(1, 2)
 
     assert contenido(lista) == contenido(lista) == "1,2"
+
+
+def test_buscar_devuelve_el_primero_que_cumple():
+    lista = lista_con(1, 4, 6)
+
+    assert lista.buscar(lambda x: x % 2 == 0) == 4
+
+
+def test_buscar_devuelve_none_si_no_hay_ninguno():
+    lista = lista_con(1, 3)
+
+    assert lista.buscar(lambda x: x > 10) is None
+    assert ListaEnlazada().buscar(lambda x: True) is None

@@ -21,7 +21,12 @@ class ListaEnlazada:
 
     def buscar(self, condicion):
         """Devuelve el primer dato que cumple condicion(dato), o None."""
-        raise NotImplementedError("OME-30")
+        actual = self.cabeza
+        while actual is not None:
+            if condicion(actual.dato):
+                return actual.dato
+            actual = actual.siguiente
+        return None
 
     def eliminar(self, condicion) -> bool:
         """Elimina el primer dato que cumple condicion(dato). True si eliminó algo."""
