@@ -6,10 +6,18 @@ class ListaEnlazada:
 
     def __init__(self) -> None:
         self.cabeza: Nodo | None = None
+        self._cola: Nodo | None = None
+        self._tamano = 0
 
     def insertar(self, dato) -> None:
         """Añade el dato al final."""
-        raise NotImplementedError("OME-30")
+        nuevo = Nodo(dato)
+        if self.cabeza is None:
+            self.cabeza = nuevo
+        else:
+            self._cola.siguiente = nuevo
+        self._cola = nuevo
+        self._tamano += 1
 
     def buscar(self, condicion):
         """Devuelve el primer dato que cumple condicion(dato), o None."""
@@ -20,8 +28,11 @@ class ListaEnlazada:
         raise NotImplementedError("OME-30")
 
     def __len__(self) -> int:
-        raise NotImplementedError("OME-30")
+        return self._tamano
 
     def __iter__(self):
         """Permite recorrerla con un for."""
-        raise NotImplementedError("OME-30")
+        actual = self.cabeza
+        while actual is not None:
+            yield actual.dato
+            actual = actual.siguiente
