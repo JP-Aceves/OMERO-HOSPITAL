@@ -32,8 +32,12 @@ class RepositorioJSON:
         self._usuarios = usuarios
 
     def buscar_por_usuario(self, nombre_usuario: str) -> Usuario | None:
-        raise NotImplementedError("OME-22")
+        """Devuelve el usuario con ese nombre de usuario, o None si no existe."""
+        return self._usuarios.buscar(lambda u: u.usuario == nombre_usuario)
 
     def anadir(self, usuario: Usuario) -> None:
         """Guarda un usuario nuevo. Lanza ValueError si el nombre de usuario ya existe."""
-        raise NotImplementedError("OME-22")
+        if self.buscar_por_usuario(usuario.usuario) is not None:
+            raise ValueError(f"El usuario '{usuario.usuario}' ya existe")
+        self._usuarios.insertar(usuario)
+        self.guardar(self._usuarios)

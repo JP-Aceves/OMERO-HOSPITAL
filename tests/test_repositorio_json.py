@@ -1,6 +1,8 @@
 """Pruebas del repositorio de usuarios en JSON (OME-22)."""
 import json
 
+import pytest
+
 from model.lista_enlazada import ListaEnlazada
 from model.usuario import JefeSanidad, ResponsableCarpa, TecnicoLogistica, hashear
 from persistence.repositorio_json import RepositorioJSON
@@ -70,3 +72,41 @@ def test_guardar_crea_la_carpeta_si_no_existe(tmp_path):
     RepositorioJSON(ruta).guardar(tres_usuarios())
 
     assert ruta.exists()
+
+
+def test_un_usuario_anadido_sigue_ahi_al_reabrir(tmp_path):
+    # Simula registrar un usuario, cerrar la app y volver a abrirla.
+    ruta = tmp_path / "usuarios.json"
+    RepositorioJSON(ruta).anadir(nuevo_usuario(JefeSanidad, "ana"))
+
+    reabierto = RepositorioJSON(ruta)
+
+    assert reabierto.buscar_por_usuario("ana") is not None
+    assert reabierto.buscar_por_usuario("ana").verificar_password("omero123")
+
+
+def test_buscar_usuario_inexistente_devuelve_none(tmp_path):
+    repositorio = RepositorioJSON(tmp_path / "usuarios.json")
+    repositorio.anadir(nuevo_usuario(JefeSanidad, "ana"))
+
+    assert repositorio.buscar_por_usuario("nadie") is None
+
+
+def test_buscar_devuelve_el_mismo_objeto_que_se_anadio(tmp_path):
+    # El login (OME-23) comprueba con "is" que recibe el mismo objeto.
+    repositorio = RepositorioJSON(tmp_path / "usuarios.json")
+    ana = nuevo_usuario(JefeSanidad, "ana")
+    repositorio.anadir(ana)
+
+    assert repositorio.buscar_por_usuario("ana") is ana
+
+
+def test_anadir_un_usuario_repetido_lanza_value_error(tmp_path):
+    ruta = tmp_path / "usuarios.json"
+    repositorio = RepositorioJSON(ruta)
+    repositorio.anadir(nuevo_usuario(JefeSanidad, "ana"))
+
+    with pytest.raises(ValueError):
+        repositorio.anadir(nuevo_usuario(TecnicoLogistica, "ana"))
+
+    assert len(RepositorioJSON(ruta).cargar()) == 1
