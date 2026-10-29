@@ -1,5 +1,6 @@
 """Pruebas del repositorio de usuarios en JSON (OME-22)."""
 import json
+from pathlib import Path
 
 import pytest
 
@@ -110,3 +111,20 @@ def test_anadir_un_usuario_repetido_lanza_value_error(tmp_path):
         repositorio.anadir(nuevo_usuario(TecnicoLogistica, "ana"))
 
     assert len(RepositorioJSON(ruta).cargar()) == 1
+
+
+def test_los_usuarios_de_prueba_son_uno_por_rol():
+    ruta = Path(__file__).resolve().parent.parent / "data" / "usuarios.json"
+    repositorio = RepositorioJSON(ruta)
+
+    jefe = repositorio.buscar_por_usuario("jefe")
+    carpa = repositorio.buscar_por_usuario("carpa")
+    logistica = repositorio.buscar_por_usuario("logistica")
+
+    assert len(repositorio.cargar()) == 3
+    assert isinstance(jefe, JefeSanidad)
+    assert isinstance(carpa, ResponsableCarpa)
+    assert isinstance(logistica, TecnicoLogistica)
+    assert jefe.verificar_password("omero123")
+    assert carpa.verificar_password("omero123")
+    assert logistica.verificar_password("omero123")
