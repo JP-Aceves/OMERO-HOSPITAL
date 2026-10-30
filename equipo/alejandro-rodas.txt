@@ -1,3 +1,4 @@
-Alejandro Rodas
-OME-23 · Login
-Sprint 1
+Nombre: Alejandro Rodas
+Rol: Equipo de desarrollo
+Tareas: OME-23 · Pantalla de login
+Sprint: 1

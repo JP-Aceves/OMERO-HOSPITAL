@@ -1,3 +1,4 @@
-Alejandro Medina
-OME-24 · Pantalla de registro
-Sprint 1
+Nombre: Alejandro Medina
+Rol: Product Owner
+Tareas: OME-21 · Usuario y tres roles, OME-24 · Pantalla de registro
+Sprint: 1
