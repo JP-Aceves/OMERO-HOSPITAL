@@ -1,0 +1,23 @@
+[
+  {
+    "nombre": "Jefe de prueba",
+    "usuario": "jefe",
+    "rol": "jefe_sanidad",
+    "sal": "a4887837d5f82e448656d42884a4474f",
+    "hash": "f454f353fc581c80cadeb855072178cb3ca59ef942c687a78dd7aab79941695c"
+  },
+  {
+    "nombre": "Responsable de prueba",
+    "usuario": "carpa",
+    "rol": "responsable_carpa",
+    "sal": "4b1eb8740f1b20e3cb8db9c6beb836a3",
+    "hash": "9a243495dd20413423e590c8faf1eaa3b787b7d296ddd3edef2edbc2e433571c"
+  },
+  {
+    "nombre": "Técnico de prueba",
+    "usuario": "logistica",
+    "rol": "tecnico_logistica",
+    "sal": "841e342ea2e7232a7d8a2b06b1458d17",
+    "hash": "85d7e977bd7e16a1562a2382ebf78416faa83243e29c5b8af19ae7f335d68fa9"
+  }
+]
