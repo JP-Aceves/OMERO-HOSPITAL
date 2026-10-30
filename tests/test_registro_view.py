@@ -21,7 +21,8 @@ def formulario():
     volver = Mock()
     vista = RegistroView(registrar, volver).construir()
     campos = {
-        control.key: control
+        # en la vista las claves llevan "test:" para que Flet no recree el campo
+        control.key.removeprefix("test:"): control
         for control in recorrer(vista.controls)
         if getattr(control, "key", None) is not None
     }
