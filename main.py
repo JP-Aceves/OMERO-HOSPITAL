@@ -10,6 +10,7 @@ from view.registro_view import RegistroView
 
 def main(page: ft.Page) -> None:
     page.title = "OMERO"
+    page.theme_mode = ft.ThemeMode.LIGHT
     page.window.width = 1000
     page.window.height = 650
 

@@ -24,24 +24,24 @@ class RegistroView:
             "fill_color": "#FFFFFF",
         }
         nombre = ft.TextField(
-            key="registro_nombre", label="Nombre", autofocus=True, **estilo_campo
+            key="test:registro_nombre", label="Nombre", autofocus=True, **estilo_campo
         )
         usuario = ft.TextField(
-            key="registro_usuario", label="Usuario", autocorrect=False,
+            key="test:registro_usuario", label="Usuario", autocorrect=False,
             enable_suggestions=False, **estilo_campo,
         )
         contrasena = ft.TextField(
-            key="registro_contrasena", label="Contraseña", password=True,
+            key="test:registro_contrasena", label="Contraseña", password=True,
             can_reveal_password=True, autocorrect=False, enable_suggestions=False,
             col={"xs": 12, "sm": 6}, **estilo_campo,
         )
         repetir = ft.TextField(
-            key="registro_repetir", label="Repetir contraseña", password=True,
+            key="test:registro_repetir", label="Repetir contraseña", password=True,
             can_reveal_password=True, autocorrect=False, enable_suggestions=False,
             col={"xs": 12, "sm": 6}, **estilo_campo,
         )
         rol = ft.Dropdown(
-            key="registro_rol", label="Rol", hint_text="Selecciona tu rol", expand=True,
+            key="test:registro_rol", label="Rol", hint_text="Selecciona tu rol", expand=True,
             options=[
                 ft.dropdown.Option("jefe_sanidad", "Jefe de sanidad"),
                 ft.dropdown.Option("responsable_carpa", "Responsable de carpa"),
@@ -50,7 +50,7 @@ class RegistroView:
             **estilo_campo,
         )
         mensaje_error = ft.Text(
-            "", key="registro_error", color="#B42318", size=13, visible=False
+            "", key="test:registro_error", color="#B42318", size=13, visible=False
         )
 
         def registrar(_):
@@ -67,7 +67,7 @@ class RegistroView:
         botones = ft.ResponsiveRow(
             [
                 ft.OutlinedButton(
-                    "Volver al login", key="registro_volver",
+                    "Volver al login", key="test:registro_volver",
                     on_click=lambda _: self.al_volver(), height=44,
                     col={"xs": 12, "sm": 6},
                     style=ft.ButtonStyle(
@@ -76,7 +76,7 @@ class RegistroView:
                     ),
                 ),
                 ft.ElevatedButton(
-                    "Registrarme", key="registro_enviar", on_click=registrar,
+                    "Registrarme", key="test:registro_enviar", on_click=registrar,
                     height=44, col={"xs": 12, "sm": 6},
                     style=ft.ButtonStyle(
                         color="#FFFFFF", bgcolor="#006ED3", elevation=0,
@@ -89,7 +89,6 @@ class RegistroView:
         tarjeta = ft.Container(
             width=640, padding=28, bgcolor="#FFFFFF",
             border=ft.border.all(1, "#DFE6EE"), border_radius=16,
-            theme_mode=ft.ThemeMode.LIGHT,
             content=ft.Column(
                 [
                     ft.Row(
