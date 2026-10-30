@@ -1,0 +1,4 @@
+Nombre: Ivan Sanz
+Rol: Equipo de desarrollo
+Tareas: OME-30 · Lista enlazada propia, OME-22 · Guardar y leer los usuarios en JSON
+Sprint: 1

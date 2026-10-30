@@ -1,3 +1,4 @@
 Nombre: Jose Aceves
-Tarea: OME-27 · Actualizar Product Backlog y requisitos
+Rol: Scrum Master
+Tareas: OME-20 · Estructura Flet + MVC, OME-54 · Integrar login y registro en main.py, OME-26 · Actas del sprint, OME-27 · Product Backlog y requisitos
 Sprint: 1
