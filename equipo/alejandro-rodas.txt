@@ -1,0 +1,4 @@
+Nombre: Alejandro Rodas
+Rol: Equipo de desarrollo
+Tareas: OME-23 · Pantalla de login
+Sprint: 1
