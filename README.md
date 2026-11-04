@@ -27,7 +27,8 @@ Proyecto integrador de **Proyecto de Informática I y II**, Grado en Ingeniería
 
 | Rol | Qué ve |
 |---|---|
-| **Jefe de sanidad** | Todas las zonas, alertas, histórico, predicciones, gestión de usuarios |
+| **Administrador** | Gestión de las cuentas de usuario |
+| **Jefe de sanidad** | Todas las zonas, gestión de zonas y sensores, asignación de responsables, alertas, histórico y predicciones |
 | **Responsable de carpa** | Temperatura, humedad, calidad del aire, luz y ventilación de su carpa |
 | **Técnico de logística** | Nivel de depósitos, humo/gas, viento, control de actuadores |
 
@@ -81,7 +82,7 @@ Tests: `pytest`
 
 | Carpeta | Qué va dentro |
 |---|---|
-| `model/` | Clases del dominio (Usuario, Nodo, ListaEnlazada) |
+| `model/` | Clases del dominio (Usuario, Zona, Sensor, Actuador, Lectura, Nodo, ListaEnlazada) |
 | `view/` | Pantallas de Flet. Nunca leen el JSON directamente |
 | `controller/` | Reciben eventos de las vistas y coordinan |
 | `service/` | Lógica reutilizable (simulador, alertas, estadística) |
@@ -91,10 +92,51 @@ Tests: `pytest`
 
 Normas de trabajo con Git: ver [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Formato de los datos (A-03)
+
+`data/zonas.json`: cada zona con sus sensores y actuadores. `responsable` es el nombre de usuario asignado (o `null`).
+
+```json
+[
+  {
+    "id": "Z1",
+    "nombre": "Carpa de hospitalización",
+    "tipo": "carpa",
+    "responsable": "carpa",
+    "sensores": [
+      {"id": "S1", "nombre": "DHT22 temperatura", "tipo": "temperatura", "umbral_aviso": 30, "umbral_critico": 35}
+    ],
+    "actuadores": [
+      {"id": "A1", "nombre": "Ventilador", "tipo": "ventilador", "encendido": false}
+    ]
+  }
+]
+```
+
+`data/lecturas.json`: lo genera el simulador (`python -m service.simulador --rondas 50`) y no se sube a Git. Cada lectura tiene el mismo formato que enviará el ESP32 en el segundo semestre.
+
+```json
+[
+  {"zona": "Z1", "sensor": "S1", "tipo": "temperatura", "valor": 31.4, "unidad": "°C", "fecha_hora": "2026-11-10T18:30:00"}
+]
+```
+
+| `tipo` | Sensor | Unidad | Rango simulado |
+|---|---|---|---|
+| `temperatura` | DHT22 | °C | 15 a 45 |
+| `humedad` | DHT22 | % | 20 a 95 |
+| `calidad_aire` | MQ-135 | ppm | 300 a 2000 |
+| `luz` | LDR | lux | 0 a 1000 |
+| `humo_gas` | MQ-2 | ppm | 100 a 800 |
+| `nivel_deposito` | HC-SR04 | % | 0 a 100 |
+| `viento` | Anemómetro | km/h | 0 a 90 |
+
+Tipos de zona: `carpa`, `zona_tecnica`, `exterior`. Tipos de actuador: `ventilador`, `led_semaforo`, `led_evacuacion`.
+
 ## Roadmap S1
 
 - [x] Sprint 0 · Anteproyecto, Product Backlog y mockups
-- [ ] Sprint 1 · Estructura base y autenticación
+- [x] Sprint 1 · Estructura base y autenticación (`v0.1-sprint1`)
 - [ ] Sprint 2 · Gestión de datos (CRUD) y simulador de sensores
 - [ ] Sprint 3 · Dashboards, alertas y estadística
 - [ ] Sprint 4 · Optimización y entrega final
