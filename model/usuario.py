@@ -55,6 +55,14 @@ class TecnicoLogistica(Usuario):
     ROL = "tecnico_logistica"
 
 
+class Administrador(Usuario):
+    """Gestiona las cuentas de usuario. Responsable: Medina (OME-57).
+
+    Falta añadirlo al diccionario de crear_usuario (lo hace OME-57).
+    """
+    ROL = "administrador"
+
+
 def crear_usuario(datos: dict) -> Usuario:
     """Crea la subclase correcta a partir de un dict leído del JSON."""
     roles = {
