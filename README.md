@@ -104,7 +104,7 @@ Normas de trabajo con Git: ver [CONTRIBUTING.md](CONTRIBUTING.md).
     "tipo": "carpa",
     "responsable": "carpa",
     "sensores": [
-      {"id": "S1", "nombre": "DHT22 temperatura", "tipo": "temperatura", "umbral_aviso": 30, "umbral_critico": 35}
+      {"id": "S1", "nombre": "DHT22 temperatura", "tipo": "temperatura", "umbral_aviso": 28, "umbral_critico": 32}
     ],
     "actuadores": [
       {"id": "A1", "nombre": "Ventilador", "tipo": "ventilador", "encendido": false}
@@ -121,15 +121,22 @@ Normas de trabajo con Git: ver [CONTRIBUTING.md](CONTRIBUTING.md).
 ]
 ```
 
-| `tipo` | Sensor | Unidad | Rango simulado |
-|---|---|---|---|
-| `temperatura` | DHT22 | °C | 15 a 45 |
-| `humedad` | DHT22 | % | 20 a 95 |
-| `calidad_aire` | MQ-135 | ppm | 300 a 2000 |
-| `luz` | LDR | lux | 0 a 1000 |
-| `humo_gas` | MQ-2 | ppm | 100 a 800 |
-| `nivel_deposito` | HC-SR04 | % | 0 a 100 |
-| `viento` | Anemómetro | km/h | 0 a 90 |
+## Umbrales (fuente: tabla "Umbrales iniciales por sensor" del documento del proyecto)
+
+| `tipo` | Sensor | Unidad | Aviso | Crítico | Malo si | Rango simulado |
+|---|---|---|---|---|---|---|
+| `temperatura` | DHT22 | °C | 28 | 32 | sube | 15 a 45 |
+| `humedad` | DHT22 | % | 60 | 70 | sube | 20 a 95 |
+| `calidad_aire` | MQ-135 | % sobre la base | 20 | 50 | sube | 0 a 100 |
+| `humo_gas` | MQ-2 | % sobre la base | 20 | 50 | sube | 0 a 100 |
+| `viento` | Anemómetro | km/h | 30 | 50 | sube | 0 a 90 |
+| `luz` | LDR | % | 40 | 20 | **baja** (`INVERSO`) | 0 a 100 |
+| `nivel_deposito` | HC-SR04 | % | 50 | 20 | **baja** (`INVERSO`) | 0 a 100 |
+
+- Los MQ, sin calibrar, no dan ppm exactos: se mide el % por encima del valor base en aire limpio.
+- La humedad también es mala por debajo de 30 % (aviso) y 20 % (crítico); ese lado se añade en el Sprint 3 (HU-09).
+- Estado de un sensor: si no es inverso, a partir del crítico es crítico y a partir del aviso es aviso; si es inverso, igual hacia abajo. El estado de una zona es el peor de sus sensores.
+- Si cambia un umbral, se cambia en el documento del proyecto y aquí, en ningún otro sitio.
 
 Tipos de zona: `carpa`, `zona_tecnica`, `exterior`. Tipos de actuador: `ventilador`, `led_semaforo`, `led_evacuacion`.
 
