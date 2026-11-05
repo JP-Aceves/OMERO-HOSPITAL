@@ -8,22 +8,35 @@ INVERSO = True:  el sensor es malo cuando BAJA (aviso > crítico, p. ej. depósi
 Umbrales oficiales: tabla "Umbrales iniciales por sensor" del documento del proyecto (ver README).
 Los MQ (calidad del aire y humo/gas) se miden en % sobre el valor base en aire limpio.
 """
-from abc import ABC
+from abc import ABC, abstractmethod
 
 
 class Sensor(ABC):
-    TIPO: str = ""
+    @property
+    @abstractmethod
+    def TIPO(self) -> str:
+        """Identificador que debe definir cada tipo de sensor."""
+
     MODELO: str = ""
     UNIDAD: str = ""
     RANGO: tuple[float, float] = (0, 0)
     INVERSO: bool = False
 
     def __init__(self, id: str, nombre: str, umbral_aviso: float, umbral_critico: float) -> None:
-        raise NotImplementedError("OME-31")
+        self.id = id
+        self.nombre = nombre
+        self.umbral_aviso = umbral_aviso
+        self.umbral_critico = umbral_critico
 
     def to_dict(self) -> dict:
         """{"id", "nombre", "tipo", "umbral_aviso", "umbral_critico"} para guardar en zonas.json."""
-        raise NotImplementedError("OME-31")
+        return {
+            "id": self.id,
+            "nombre": self.nombre,
+            "tipo": self.TIPO,
+            "umbral_aviso": self.umbral_aviso,
+            "umbral_critico": self.umbral_critico,
+        }
 
 
 class SensorTemperatura(Sensor):
@@ -79,4 +92,22 @@ class SensorViento(Sensor):
 
 def crear_sensor(datos: dict) -> Sensor:
     """Crea la subclase correcta según datos["tipo"]. ValueError si el tipo no existe."""
-    raise NotImplementedError("OME-31")
+    clases = {
+        SensorTemperatura.TIPO: SensorTemperatura,
+        SensorHumedad.TIPO: SensorHumedad,
+        SensorCalidadAire.TIPO: SensorCalidadAire,
+        SensorLuz.TIPO: SensorLuz,
+        SensorHumoGas.TIPO: SensorHumoGas,
+        SensorNivelDeposito.TIPO: SensorNivelDeposito,
+        SensorViento.TIPO: SensorViento,
+    }
+    tipo = datos["tipo"]
+    clase = clases.get(tipo) if isinstance(tipo, str) else None
+    if clase is None:
+        raise ValueError(f"Tipo de sensor desconocido: {tipo}")
+    return clase(
+        id=datos["id"],
+        nombre=datos["nombre"],
+        umbral_aviso=datos["umbral_aviso"],
+        umbral_critico=datos["umbral_critico"],
+    )
