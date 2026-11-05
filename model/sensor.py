@@ -1,7 +1,12 @@
 """Sensores de OMERO: una clase abstracta y una subclase por tipo. Responsable: Medina (OME-31).
 
 Mismo patrón que Usuario: herencia + fábrica crear_sensor(dict).
-Cada subclase solo define TIPO, MODELO, UNIDAD y RANGO (lo usa el simulador).
+Cada subclase solo define TIPO, MODELO, UNIDAD, RANGO (lo usa el simulador) e INVERSO.
+
+INVERSO = False: el sensor es malo cuando SUBE (aviso < crítico, p. ej. 28 / 32 °C).
+INVERSO = True:  el sensor es malo cuando BAJA (aviso > crítico, p. ej. depósito 50 / 20 %).
+Umbrales oficiales: tabla "Umbrales iniciales por sensor" del documento del proyecto (ver README).
+Los MQ (calidad del aire y humo/gas) se miden en % sobre el valor base en aire limpio.
 """
 from abc import ABC
 
@@ -11,6 +16,7 @@ class Sensor(ABC):
     MODELO: str = ""
     UNIDAD: str = ""
     RANGO: tuple[float, float] = (0, 0)
+    INVERSO: bool = False
 
     def __init__(self, id: str, nombre: str, umbral_aviso: float, umbral_critico: float) -> None:
         raise NotImplementedError("OME-31")
@@ -37,22 +43,23 @@ class SensorHumedad(Sensor):
 class SensorCalidadAire(Sensor):
     TIPO = "calidad_aire"
     MODELO = "MQ-135"
-    UNIDAD = "ppm"
-    RANGO = (300, 2000)
+    UNIDAD = "%"           # % sobre la base
+    RANGO = (0, 100)
 
 
 class SensorLuz(Sensor):
     TIPO = "luz"
     MODELO = "LDR"
-    UNIDAD = "lux"
-    RANGO = (0, 1000)
+    UNIDAD = "%"
+    RANGO = (0, 100)
+    INVERSO = True         # malo si baja (corte de luz)
 
 
 class SensorHumoGas(Sensor):
     TIPO = "humo_gas"
     MODELO = "MQ-2"
-    UNIDAD = "ppm"
-    RANGO = (100, 800)
+    UNIDAD = "%"           # % sobre la base
+    RANGO = (0, 100)
 
 
 class SensorNivelDeposito(Sensor):
@@ -60,6 +67,7 @@ class SensorNivelDeposito(Sensor):
     MODELO = "HC-SR04"
     UNIDAD = "%"
     RANGO = (0, 100)
+    INVERSO = True         # malo si baja (se vacía)
 
 
 class SensorViento(Sensor):
