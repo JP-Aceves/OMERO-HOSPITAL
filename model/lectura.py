@@ -7,11 +7,30 @@
 class Lectura:
 
     def __init__(self, zona: str, sensor: str, tipo: str, valor: float, unidad: str, fecha_hora: str) -> None:
-        raise NotImplementedError("OME-31")
+        self.zona = zona
+        self.sensor = sensor
+        self.tipo = tipo
+        self.valor = valor
+        self.unidad = unidad
+        self.fecha_hora = fecha_hora
 
     def to_dict(self) -> dict:
-        raise NotImplementedError("OME-31")
+        return {
+            "zona": self.zona,
+            "sensor": self.sensor,
+            "tipo": self.tipo,
+            "valor": self.valor,
+            "unidad": self.unidad,
+            "fecha_hora": self.fecha_hora,
+        }
 
     @staticmethod
     def desde_dict(datos: dict) -> "Lectura":
-        raise NotImplementedError("OME-31")
+        return Lectura(
+            zona=datos["zona"],
+            sensor=datos["sensor"],
+            tipo=datos["tipo"],
+            valor=datos["valor"],
+            unidad=datos["unidad"],
+            fecha_hora=datos["fecha_hora"],
+        )
