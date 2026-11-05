@@ -1,0 +1,98 @@
+[
+  {
+    "id": "Z1",
+    "nombre": "Carpa de hospitalización",
+    "tipo": "carpa",
+    "responsable": "carpa",
+    "sensores": [
+      {
+        "id": "S1",
+        "nombre": "DHT22 temperatura",
+        "tipo": "temperatura",
+        "umbral_aviso": 30,
+        "umbral_critico": 35
+      },
+      {
+        "id": "S2",
+        "nombre": "DHT22 humedad",
+        "tipo": "humedad",
+        "umbral_aviso": 70,
+        "umbral_critico": 85
+      },
+      {
+        "id": "S3",
+        "nombre": "MQ-135 calidad del aire",
+        "tipo": "calidad_aire",
+        "umbral_aviso": 400,
+        "umbral_critico": 1000
+      },
+      {
+        "id": "S4",
+        "nombre": "LDR luz",
+        "tipo": "luz",
+        "umbral_aviso": 200,
+        "umbral_critico": 50
+      }
+    ],
+    "actuadores": [
+      {
+        "id": "A1",
+        "nombre": "Ventilador",
+        "tipo": "ventilador",
+        "encendido": false
+      },
+      {
+        "id": "A2",
+        "nombre": "Semáforo de la carpa",
+        "tipo": "led_semaforo",
+        "encendido": false
+      }
+    ]
+  },
+  {
+    "id": "Z2",
+    "nombre": "Zona técnica",
+    "tipo": "zona_tecnica",
+    "responsable": "logistica",
+    "sensores": [
+      {
+        "id": "S5",
+        "nombre": "MQ-2 humo y gas",
+        "tipo": "humo_gas",
+        "umbral_aviso": 300,
+        "umbral_critico": 400
+      },
+      {
+        "id": "S6",
+        "nombre": "HC-SR04 depósito de agua",
+        "tipo": "nivel_deposito",
+        "umbral_aviso": 30,
+        "umbral_critico": 20
+      }
+    ],
+    "actuadores": [
+      {
+        "id": "A3",
+        "nombre": "Semáforo zona técnica",
+        "tipo": "led_semaforo",
+        "encendido": false
+      }
+    ]
+  },
+  {
+    "id": "Z3",
+    "nombre": "Exterior del campamento",
+    "tipo": "exterior",
+    "responsable": "logistica",
+    "sensores": [
+      {
+        "id": "S7",
+        "nombre": "Anemómetro viento",
+        "tipo": "viento",
+        "umbral_aviso": 40,
+        "umbral_critico": 60
+      }
+    ],
+    "actuadores": []
+  }
+]
