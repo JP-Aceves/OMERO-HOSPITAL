@@ -108,7 +108,7 @@ class RegistroView:
                         [
                             ft.Text(
                                 "Crear cuenta", size=26, weight=ft.FontWeight.BOLD,
-                                color=tema.TEXTO,
+                                color=tema.TEXTO, font_family=tema.FUENTE_TITULOS,
                             ),
                             ft.Text(
                                 "El jefe de sanidad asignará tus zonas después del registro.",
