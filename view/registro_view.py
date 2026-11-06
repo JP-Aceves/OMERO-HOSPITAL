@@ -122,7 +122,7 @@ class RegistroView:
                     ft.ResponsiveRow(
                         [contrasena, repetir], spacing=12, run_spacing=16
                     ),
-                    ft.Row([rol]),
+                    rol,
                     ft.Text(
                         "Todos los campos son obligatorios.", size=12, color=tema.TEXTO_SUAVE
                     ),
