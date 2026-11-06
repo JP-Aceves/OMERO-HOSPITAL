@@ -1,4 +1,4 @@
 Nombre: Ivan Sanz
 Rol: Equipo de desarrollo
-Tareas: OME-30 · Lista enlazada propia, OME-22 · Guardar y leer los usuarios en JSON
-Sprint: 1
+Tareas: OME-33 · Simulador de lecturas de 6 sensores, OME-34 · Repositorios de zonas y lecturas en JSON
+Sprint: 2
