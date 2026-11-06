@@ -14,6 +14,7 @@ class RegistroController:
             return "Rellena todos los campos"
         if contrasena != repetir:
             return "Las contraseñas no coinciden"
+        # El administrador se asigna desde gestión de usuarios, no desde el registro.
         if rol not in ("jefe_sanidad", "responsable_carpa", "tecnico_logistica"):
             return "Selecciona un rol válido"
 
