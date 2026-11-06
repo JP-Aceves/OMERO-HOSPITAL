@@ -99,7 +99,7 @@ class UsuariosView:
 
             pagina = evento.page
 
-            def confirmar(_evento: ft.ControlEvent) -> None:
+            async def confirmar(_evento: ft.ControlEvent) -> None:
                 pagina.close(dialogo)
                 _, administrador_actual = self._cuentas_y_administrador()
                 if administrador_actual is None:
@@ -133,6 +133,15 @@ class UsuariosView:
         def fila(cuenta: Usuario) -> ft.DataRow:
             nombre_usuario = cuenta.usuario
             es_propia = nombre_usuario == self.usuario.usuario
+
+            # Flet despacha los callbacks síncronos en hilos. Estos se ejecutan
+            # en el mismo bucle, sin ceder entre verificar permisos y actuar.
+            async def al_cambiar_rol(evento: ft.ControlEvent) -> None:
+                cambiar_rol(nombre_usuario, evento)
+
+            async def al_solicitar_eliminacion(evento: ft.ControlEvent) -> None:
+                solicitar_eliminacion(nombre_usuario, evento)
+
             rol = ft.Dropdown(
                 label=f"Rol de {nombre_usuario}",
                 value=cuenta.ROL,
@@ -141,7 +150,7 @@ class UsuariosView:
                 color=tema.TEXTO,
                 border_color=tema.BORDE,
                 focused_border_color=tema.PRIMARIO,
-                on_change=lambda evento: cambiar_rol(nombre_usuario, evento),
+                on_change=al_cambiar_rol,
             )
             eliminar = ft.OutlinedButton(
                 "Eliminar",
@@ -151,7 +160,7 @@ class UsuariosView:
                     else f"Eliminar la cuenta de {nombre_usuario}"
                 ),
                 style=ft.ButtonStyle(color=tema.CRITICO),
-                on_click=lambda evento: solicitar_eliminacion(nombre_usuario, evento),
+                on_click=al_solicitar_eliminacion,
             )
             return ft.DataRow(cells=[
                 ft.DataCell(ft.Text(cuenta.nombre)),

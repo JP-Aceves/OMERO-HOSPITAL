@@ -1,3 +1,6 @@
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
+
 import pytest
 
 from controller.usuarios_controller import UsuariosController
@@ -60,6 +63,24 @@ def test_cambiar_rol_permite_degradar_a_un_admin_si_queda_otro(usuarios):
     recargado = RepositorioJSON(repositorio.ruta)
     assert isinstance(recargado.buscar_por_usuario("admin"), TecnicoLogistica)
     assert isinstance(recargado.buscar_por_usuario("otro_admin"), Administrador)
+
+
+def test_dos_cambios_simultaneos_conservan_un_administrador(usuarios):
+    controlador, repositorio, _, _ = usuarios
+    _anadir_cuenta(repositorio, "otro_admin", "administrador")
+    inicio = Barrier(2, timeout=5)
+
+    def degradar(nombre_usuario):
+        inicio.wait()
+        return controlador.cambiar_rol(nombre_usuario, "tecnico_logistica")
+
+    with ThreadPoolExecutor(max_workers=2) as hilos:
+        resultados = tuple(hilos.map(degradar, ("admin", "otro_admin")))
+
+    assert resultados.count(None) == 1
+    assert "Debe quedar al menos un administrador" in resultados
+    recargado = RepositorioJSON(repositorio.ruta)
+    assert sum(cuenta.ROL == Administrador.ROL for cuenta in recargado.cargar()) == 1
 
 
 @pytest.mark.parametrize(
