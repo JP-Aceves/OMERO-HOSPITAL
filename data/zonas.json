@@ -9,29 +9,29 @@
         "id": "S1",
         "nombre": "DHT22 temperatura",
         "tipo": "temperatura",
-        "umbral_aviso": 30,
-        "umbral_critico": 35
+        "umbral_aviso": 28,
+        "umbral_critico": 32
       },
       {
         "id": "S2",
         "nombre": "DHT22 humedad",
         "tipo": "humedad",
-        "umbral_aviso": 70,
-        "umbral_critico": 85
+        "umbral_aviso": 60,
+        "umbral_critico": 70
       },
       {
         "id": "S3",
         "nombre": "MQ-135 calidad del aire",
         "tipo": "calidad_aire",
-        "umbral_aviso": 400,
-        "umbral_critico": 1000
+        "umbral_aviso": 20,
+        "umbral_critico": 50
       },
       {
         "id": "S4",
         "nombre": "LDR luz",
         "tipo": "luz",
-        "umbral_aviso": 200,
-        "umbral_critico": 50
+        "umbral_aviso": 40,
+        "umbral_critico": 20
       }
     ],
     "actuadores": [
@@ -59,22 +59,22 @@
         "id": "S5",
         "nombre": "MQ-2 humo y gas",
         "tipo": "humo_gas",
-        "umbral_aviso": 300,
-        "umbral_critico": 400
+        "umbral_aviso": 20,
+        "umbral_critico": 50
       },
       {
         "id": "S6",
         "nombre": "HC-SR04 depósito de agua",
         "tipo": "nivel_deposito",
-        "umbral_aviso": 30,
+        "umbral_aviso": 50,
         "umbral_critico": 20
       }
     ],
     "actuadores": [
       {
         "id": "A3",
-        "nombre": "Semáforo zona técnica",
-        "tipo": "led_semaforo",
+        "nombre": "LEDs de evacuación",
+        "tipo": "led_evacuacion",
         "encendido": false
       }
     ]
@@ -89,8 +89,8 @@
         "id": "S7",
         "nombre": "Anemómetro viento",
         "tipo": "viento",
-        "umbral_aviso": 40,
-        "umbral_critico": 60
+        "umbral_aviso": 30,
+        "umbral_critico": 50
       }
     ],
     "actuadores": []
