@@ -1,8 +1,11 @@
-"""Qué pantallas ve cada rol y a dónde va tras el login. Responsable: JP (OME-25)."""
+"""Qué pantallas ve cada rol y a dónde va tras el login. Responsable: JP (OME-25).
+
+El "/inicio" del jefe de sanidad es su dashboard (OME-40, DashboardJefeView).
+"""
 
 MENU_POR_ROL: dict[str, list[tuple[str, str]]] = {
     "administrador": [("Usuarios", "/usuarios")],
-    "jefe_sanidad": [("Inicio", "/inicio"), ("Zonas y sensores", "/zonas")],
+    "jefe_sanidad": [("Estado global", "/inicio"), ("Zonas y sensores", "/zonas")],
     "responsable_carpa": [("Mi carpa", "/inicio")],
     "tecnico_logistica": [("Recursos", "/inicio")],
 }
