@@ -1,4 +1,4 @@
 Nombre: Alejandro Medina
 Rol: Product Owner
-Tareas: OME-31 · Modelo de Zona, Sensor, Actuador y Lectura
+Tareas: OME-31 · Modelo de Zona, Sensor, Actuador y Lectura, OME-57 · Rol administrador y gestión de usuarios
 Sprint: 2
