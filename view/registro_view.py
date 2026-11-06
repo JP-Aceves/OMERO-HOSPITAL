@@ -3,6 +3,8 @@ from typing import Callable
 
 import flet as ft
 
+from view import tema
+
 
 class RegistroView:
     RUTA = "/registro"
@@ -15,13 +17,13 @@ class RegistroView:
     def construir(self) -> ft.View:
         estilo_campo = {
             "border_radius": 8,
-            "border_color": "#CDD7E2",
-            "focused_border_color": "#006ED3",
-            "color": "#24364B",
-            "label_style": ft.TextStyle(color="#60748A"),
+            "border_color": tema.BORDE,
+            "focused_border_color": tema.PRIMARIO,
+            "color": tema.TEXTO,
+            "label_style": ft.TextStyle(color=tema.TEXTO_SUAVE),
             "text_size": 14,
             "filled": True,
-            "fill_color": "#FFFFFF",
+            "fill_color": tema.TARJETA,
         }
         nombre = ft.TextField(
             key="test:registro_nombre", label="Nombre", autofocus=True, **estilo_campo
@@ -50,7 +52,7 @@ class RegistroView:
             **estilo_campo,
         )
         mensaje_error = ft.Text(
-            "", key="test:registro_error", color="#B42318", size=13, visible=False
+            "", key="test:registro_error", color=tema.CRITICO, size=13, visible=False
         )
 
         def registrar(_):
@@ -71,7 +73,7 @@ class RegistroView:
                     on_click=lambda _: self.al_volver(), height=44,
                     col={"xs": 12, "sm": 6},
                     style=ft.ButtonStyle(
-                        color="#006ED3", side=ft.BorderSide(1, "#006ED3"),
+                    color=tema.PRIMARIO, side=ft.BorderSide(1, tema.PRIMARIO),
                         shape=ft.RoundedRectangleBorder(radius=8),
                     ),
                 ),
@@ -79,7 +81,7 @@ class RegistroView:
                     "Registrarme", key="test:registro_enviar", on_click=registrar,
                     height=44, col={"xs": 12, "sm": 6},
                     style=ft.ButtonStyle(
-                        color="#FFFFFF", bgcolor="#006ED3", elevation=0,
+                        color=tema.TARJETA, bgcolor=tema.PRIMARIO, elevation=0,
                         shape=ft.RoundedRectangleBorder(radius=8),
                     ),
                 ),
@@ -87,16 +89,17 @@ class RegistroView:
             spacing=12, run_spacing=12,
         )
         tarjeta = ft.Container(
-            width=640, padding=28, bgcolor="#FFFFFF",
+            padding=28, bgcolor=tema.TARJETA,
             border=ft.border.all(1, "#DFE6EE"), border_radius=16,
             content=ft.Column(
                 [
                     ft.Row(
                         [
-                            ft.Icon(ft.Icons.DONUT_LARGE, color="#009BDA", size=26),
+                            ft.Icon(ft.Icons.DONUT_LARGE, color=tema.PRIMARIO, size=26),
                             ft.Text(
                                 "OMERO", size=18, weight=ft.FontWeight.BOLD,
-                                color="#24364B",
+                                font_family=tema.FUENTE_TITULOS,
+                                color=tema.TEXTO,
                             ),
                         ],
                         spacing=8,
@@ -105,11 +108,11 @@ class RegistroView:
                         [
                             ft.Text(
                                 "Crear cuenta", size=26, weight=ft.FontWeight.BOLD,
-                                color="#24364B",
+                                color=tema.TEXTO, font_family=tema.FUENTE_TITULOS,
                             ),
                             ft.Text(
                                 "El jefe de sanidad asignará tus zonas después del registro.",
-                                size=13, color="#60748A",
+                                size=13, color=tema.TEXTO_SUAVE,
                             ),
                         ],
                         spacing=6,
@@ -119,9 +122,9 @@ class RegistroView:
                     ft.ResponsiveRow(
                         [contrasena, repetir], spacing=12, run_spacing=16
                     ),
-                    ft.Row([rol]),
+                    rol,
                     ft.Text(
-                        "Todos los campos son obligatorios.", size=12, color="#60748A"
+                        "Todos los campos son obligatorios.", size=12, color=tema.TEXTO_SUAVE
                     ),
                     mensaje_error,
                     botones,
@@ -129,8 +132,16 @@ class RegistroView:
                 spacing=16, tight=True,
             ),
         )
+        responsive = ft.ResponsiveRow(
+            [ft.Container(content=tarjeta, col={"xs": 12, "sm": 10, "md": 8, "lg": 6, "xl": 5})],
+            alignment=ft.MainAxisAlignment.CENTER,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            expand=True,
+            spacing=0,
+            run_spacing=0,
+        )
         return ft.View(
-            self.RUTA, [tarjeta], padding=24, bgcolor="#F3F6FA",
+            self.RUTA, [ft.Container(content=responsive, expand=True)], padding=24, bgcolor=tema.FONDO,
             scroll=ft.ScrollMode.AUTO,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             vertical_alignment=ft.MainAxisAlignment.CENTER,
