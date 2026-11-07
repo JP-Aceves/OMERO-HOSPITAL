@@ -40,19 +40,22 @@ class LoginView:
                 ft.Divider(height=20, color="transparent"),
                 campo_usuario,
                 campo_contrasena,
-                tema.boton_primario("Entrar", entrar, icono=ft.Icons.LOGIN, key="test:login_enviar"),
+                tema.boton_primario(
+                    "Entrar", entrar, icono=ft.Icons.LOGIN,
+                    key="test:login_enviar", expand=True,
+                ),
                 mensaje_error,
                 ft.Row(controls=[
                     ft.Text("¿Todavía no tienes cuenta?", size=13),
                     ft.TextButton("Regístrate", on_click=lambda _evento: self.al_ir_registro()),
-                ], alignment=ft.MainAxisAlignment.CENTER, spacing=4),
+                ], alignment=ft.MainAxisAlignment.CENTER, spacing=4, wrap=True),
             ],
             horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
             spacing=12,
             tight=True,
         )
         tarjeta = ft.Container(
-            content=contenido, padding=32, bgcolor=tema.TARJETA, border_radius=16,
+            content=contenido, padding=24, bgcolor=tema.TARJETA, border_radius=16,
             border=ft.border.all(1, tema.BORDE),
         )
         responsive = ft.ResponsiveRow(
@@ -60,5 +63,5 @@ class LoginView:
             alignment=ft.MainAxisAlignment.CENTER, vertical_alignment=ft.CrossAxisAlignment.CENTER,
             expand=True, spacing=0, run_spacing=0,
         )
-        return ft.View(self.RUTA, [ft.Container(content=responsive, expand=True, padding=24)],
+        return ft.View(self.RUTA, [ft.Container(content=responsive, expand=True, padding=16)],
             bgcolor=tema.FONDO, scroll=ft.ScrollMode.AUTO)

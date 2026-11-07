@@ -70,7 +70,7 @@ class RegistroView:
             [
                 ft.OutlinedButton(
                     "Volver al login", key="test:registro_volver",
-                    on_click=lambda _: self.al_volver(), height=44,
+                    on_click=lambda _: self.al_volver(), height=44, expand=True,
                     col={"xs": 12, "sm": 6},
                     style=ft.ButtonStyle(
                     color=tema.PRIMARIO, side=ft.BorderSide(1, tema.PRIMARIO),
@@ -79,7 +79,7 @@ class RegistroView:
                 ),
                 ft.ElevatedButton(
                     "Registrarme", key="test:registro_enviar", on_click=registrar,
-                    height=44, col={"xs": 12, "sm": 6},
+                    height=44, expand=True, col={"xs": 12, "sm": 6},
                     style=ft.ButtonStyle(
                         color=tema.TARJETA, bgcolor=tema.PRIMARIO, elevation=0,
                         shape=ft.RoundedRectangleBorder(radius=8),
@@ -89,7 +89,7 @@ class RegistroView:
             spacing=12, run_spacing=12,
         )
         tarjeta = ft.Container(
-            padding=28, bgcolor=tema.TARJETA,
+            padding=20, bgcolor=tema.TARJETA,
             border=ft.border.all(1, "#DFE6EE"), border_radius=16,
             content=ft.Column(
                 [
@@ -141,7 +141,7 @@ class RegistroView:
             run_spacing=0,
         )
         return ft.View(
-            self.RUTA, [ft.Container(content=responsive, expand=True)], padding=24, bgcolor=tema.FONDO,
+            self.RUTA, [ft.Container(content=responsive, expand=True, padding=16)], bgcolor=tema.FONDO,
             scroll=ft.ScrollMode.AUTO,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             vertical_alignment=ft.MainAxisAlignment.CENTER,

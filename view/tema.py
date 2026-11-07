@@ -65,4 +65,5 @@ def etiqueta_estado(estado: str, texto: str | None = None) -> ft.Control:
     color = colores[estado]
     return ft.Container(
         content=ft.Text(texto or estado.capitalize(), color=color, size=13, weight=ft.FontWeight.W_600),
-        bgcolor=f"{color}1A", padding=ft.padding.symmetric(horizontal=10, vertical=5), border_radius=12)
+        bgcolor=ft.Colors.with_opacity(0.1, color),
+        padding=ft.padding.symmetric(horizontal=10, vertical=5), border_radius=12)
