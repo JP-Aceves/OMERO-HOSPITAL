@@ -3,6 +3,7 @@ import json
 import pytest
 
 from model.usuario import (
+    Administrador,
     JefeSanidad,
     ResponsableCarpa,
     TecnicoLogistica,
@@ -17,6 +18,7 @@ ROLES = [
     (JefeSanidad, "jefe_sanidad"),
     (ResponsableCarpa, "responsable_carpa"),
     (TecnicoLogistica, "tecnico_logistica"),
+    (Administrador, "administrador"),
 ]
 
 
@@ -86,7 +88,7 @@ def test_crear_usuario_rechaza_un_rol_desconocido():
     datos = {
         "nombre": "Ana",
         "usuario": "ana",
-        "rol": "administrador",
+        "rol": "rol_desconocido",
         "sal": SALT,
         "hash": "ca83396aa0b2c1d92e2843e0b9aafaf12947ace80362ecb37b29d1671fa5d6a2",
     }
