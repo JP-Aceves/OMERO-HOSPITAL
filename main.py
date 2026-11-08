@@ -6,6 +6,7 @@ from controller.registro_controller import RegistroController
 from persistence.repositorio_json import RepositorioJSON
 from view.login_view import LoginView
 from view.registro_view import RegistroView
+from view.tema import registrar_fuentes
 
 
 def main(page: ft.Page) -> None:
@@ -13,6 +14,9 @@ def main(page: ft.Page) -> None:
     page.theme_mode = ft.ThemeMode.LIGHT
     page.window.width = 1000
     page.window.height = 650
+    page.window.min_width = 640
+    page.window.min_height = 560
+    registrar_fuentes(page)
 
     repositorio = RepositorioJSON()
     login = LoginController(repositorio)
