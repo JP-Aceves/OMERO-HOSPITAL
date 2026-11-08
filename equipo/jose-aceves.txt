@@ -1,4 +1,4 @@
 Nombre: Jose Aceves
-Rol: Scrum Master
-Tareas: OME-20 · Estructura Flet + MVC, OME-54 · Integrar login y registro en main.py, OME-26 · Actas del sprint, OME-27 · Product Backlog y requisitos
-Sprint: 1
+Rol: Product Owner
+Tareas: OME-56 · Contratos del Sprint 2, OME-25 · Panel lateral, inicio por rol y navegación, OME-35 · Pantalla de zonas y sensores, OME-38 · Backlog, requisitos, documento y release
+Sprint: 2
