@@ -14,9 +14,25 @@ CRITICO = "critico"
 
 
 def estado_sensor(sensor: Sensor, valor: float) -> str:
-    raise NotImplementedError("OME-40")
+    if sensor.INVERSO:
+        if valor <= sensor.umbral_critico:
+            return CRITICO
+        if valor <= sensor.umbral_aviso:
+            return AVISO
+    else:
+        if valor >= sensor.umbral_critico:
+            return CRITICO
+        if valor >= sensor.umbral_aviso:
+            return AVISO
+    return NORMAL
 
 
 def peor_estado(estados: ListaEnlazada) -> str:
     """De una ListaEnlazada de estados devuelve el más grave. Vacía -> "normal"."""
-    raise NotImplementedError("OME-40")
+    peor = NORMAL
+    for estado in estados:
+        if estado == CRITICO:
+            return CRITICO
+        if estado == AVISO:
+            peor = AVISO
+    return peor
