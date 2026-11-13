@@ -15,6 +15,8 @@ vista solo enseña ese texto.
 import flet as ft
 
 from controller.zonas_controller import ZonasController
+from model.sensor import (SensorCalidadAire, SensorHumedad, SensorHumoGas, SensorLuz,
+                          SensorNivelDeposito, SensorTemperatura, SensorViento)
 from model.usuario import Usuario
 from view import tema
 
@@ -36,10 +38,31 @@ NOMBRE_TIPO_ACTUADOR = {
 NOMBRE_ROL = {"responsable_carpa": "carpa", "tecnico_logistica": "logística"}
 SIN_RESPONSABLE = "__sin_responsable__"
 
+# Clase de cada tipo: de ella salen la unidad, el rango y si es INVERSO (malo si baja)
+CLASE_SENSOR = {clase.TIPO: clase for clase in (
+    SensorTemperatura, SensorHumedad, SensorCalidadAire, SensorLuz,
+    SensorHumoGas, SensorNivelDeposito, SensorViento)}
+# Umbrales recomendados (aviso, crítico): tabla de umbrales del documento del proyecto
+UMBRALES_RECOMENDADOS = {
+    "temperatura": (28, 32),
+    "humedad": (60, 70),
+    "calidad_aire": (20, 50),
+    "luz": (40, 20),
+    "humo_gas": (20, 50),
+    "nivel_deposito": (50, 20),
+    "viento": (30, 50),
+}
+
+
+def cantidad(numero: int, singular: str, plural: str) -> str:
+    """'1 sensor', '2 sensores', '0 sensores'."""
+    return f"{numero} {singular if numero == 1 else plural}"
+
 
 def resumen_zona(zona) -> str:
     """'4 sensores · 2 actuadores' (lo usan las tarjetas)."""
-    return f"{len(zona.sensores)} sensores · {len(zona.actuadores)} actuadores"
+    return (f"{cantidad(len(zona.sensores), 'sensor', 'sensores')} · "
+            f"{cantidad(len(zona.actuadores), 'actuador', 'actuadores')}")
 
 
 def opciones(nombres: dict) -> list:
@@ -109,8 +132,12 @@ class ZonasView:
 
         sensores = sum(len(zona.sensores) for zona in zonas)
         actuadores = sum(len(zona.actuadores) for zona in zonas)
-        self.subtitulo.value = (f"{len(zonas)} zonas · {sensores} sensores · {actuadores} actuadores"
-                                " · los cambios se guardan en JSON")
+        self.subtitulo.value = " · ".join([
+            cantidad(len(zonas), "zona", "zonas"),
+            cantidad(sensores, "sensor", "sensores"),
+            cantidad(actuadores, "actuador", "actuadores"),
+            "los cambios se guardan en JSON",
+        ])
 
         self.lista_zonas.controls = [self._tarjeta(zona) for zona in zonas] or [
             ft.Text("Todavía no hay zonas. Crea la primera con «+ Nueva zona».", color=tema.TEXTO_SUAVE)]
@@ -179,14 +206,15 @@ class ZonasView:
     # ================= columna derecha: detalle =================
 
     def _detalle(self, zona) -> list:
-        self.campo_nombre = tema.campo_texto("Nombre", value=zona.nombre, key="zonas_nombre",
+        self.campo_nombre = tema.campo_texto("Nombre", value=zona.nombre, key="test:zonas_nombre",
                                              on_submit=self._guardar_zona)
         self.campo_tipo = ft.Dropdown(label="Tipo de zona", value=zona.tipo, key="zonas_tipo",
-                                      options=opciones(NOMBRE_TIPO_ZONA), border_color=tema.BORDE)
+                                      options=opciones(NOMBRE_TIPO_ZONA), border_color=tema.BORDE,
+                                      expand=True)
         self.campo_responsable = ft.Dropdown(
             label="Responsable asignado", key="zonas_responsable",
             value=zona.responsable or SIN_RESPONSABLE, options=self._opciones_responsable(),
-            border_color=tema.BORDE)
+            border_color=tema.BORDE, expand=True)
 
         eliminar_zona = ft.OutlinedButton(
             "Eliminar zona", key="zonas_eliminar", on_click=self._confirmar_eliminar_zona,
@@ -196,9 +224,9 @@ class ZonasView:
             ft.Text(zona.nombre, size=22, weight=ft.FontWeight.BOLD, color=tema.TEXTO),
             ft.ResponsiveRow(
                 [
-                    ft.Container(self.campo_nombre, col={"xs": 12, "md": 4}),
-                    ft.Container(self.campo_tipo, col={"xs": 12, "md": 4}),
-                    ft.Container(self.campo_responsable, col={"xs": 12, "md": 4}),
+                    ft.Container(self.campo_nombre, col={"xs": 12}),
+                    ft.Container(self.campo_tipo, col={"xs": 12, "md": 6}),
+                    ft.Container(self.campo_responsable, col={"xs": 12, "md": 6}),
                 ],
                 spacing=12, run_spacing=12,
             ),
@@ -233,10 +261,11 @@ class ZonasView:
                 ft.DataCell(ft.Text(f"{sensor.umbral_critico} {sensor.UNIDAD}")),
                 ft.DataCell(ft.Row(
                     [
-                        ft.TextButton("Editar", key=f"editar_{sensor.id}",
+                        ft.IconButton(ft.Icons.EDIT_OUTLINED, tooltip="Editar", key=f"editar_{sensor.id}",
+                                      icon_color=tema.PRIMARIO,
                                       on_click=lambda _evento, s=sensor: self._formulario_sensor(sensor=s)),
-                        ft.TextButton("Eliminar", key=f"eliminar_{sensor.id}",
-                                      style=ft.ButtonStyle(color=tema.CRITICO),
+                        ft.IconButton(ft.Icons.DELETE_OUTLINE, tooltip="Eliminar", key=f"eliminar_{sensor.id}",
+                                      icon_color=tema.CRITICO,
                                       on_click=lambda _evento, i=sensor.id: self._eliminar_sensor(i)),
                     ],
                     spacing=0,
@@ -246,7 +275,7 @@ class ZonasView:
             return ft.Text("Esta zona todavía no tiene sensores.", color=tema.TEXTO_SUAVE)
         tabla = ft.DataTable(
             columns=[ft.DataColumn(ft.Text(titulo)) for titulo in ("Sensor", "Mide", "Aviso", "Crítico", "")],
-            rows=filas, column_spacing=20,
+            rows=filas, column_spacing=16,
             heading_text_style=ft.TextStyle(color=tema.TEXTO_SUAVE, weight=ft.FontWeight.BOLD),
         )
         return ft.Row([tabla], scroll=ft.ScrollMode.AUTO)   # scroll lateral con la ventana estrecha
@@ -258,15 +287,16 @@ class ZonasView:
                 ft.DataCell(ft.Text(actuador.nombre)),
                 ft.DataCell(ft.Text(NOMBRE_TIPO_ACTUADOR.get(actuador.tipo, actuador.tipo))),
                 ft.DataCell(ft.Text("Encendido" if actuador.encendido else "Apagado")),
-                ft.DataCell(ft.TextButton(
-                    "Eliminar", key=f"eliminar_{actuador.id}", style=ft.ButtonStyle(color=tema.CRITICO),
+                ft.DataCell(ft.IconButton(
+                    ft.Icons.DELETE_OUTLINE, tooltip="Eliminar", key=f"eliminar_{actuador.id}",
+                    icon_color=tema.CRITICO,
                     on_click=lambda _evento, i=actuador.id: self._eliminar_actuador(i))),
             ]))
         if not filas:
             return ft.Text("Esta zona todavía no tiene actuadores.", color=tema.TEXTO_SUAVE)
         tabla = ft.DataTable(
             columns=[ft.DataColumn(ft.Text(titulo)) for titulo in ("Actuador", "Tipo", "Estado", "")],
-            rows=filas, column_spacing=20,
+            rows=filas, column_spacing=16,
             heading_text_style=ft.TextStyle(color=tema.TEXTO_SUAVE, weight=ft.FontWeight.BOLD),
         )
         return ft.Row([tabla], scroll=ft.ScrollMode.AUTO)
@@ -305,6 +335,12 @@ class ZonasView:
         self.dialogo = dialogo
         if self.raiz is not None and self.raiz.page is not None:
             self.raiz.page.open(dialogo)
+            # Foco al primer campo una sola vez. Con autofocus, Flet devolvía el cursor
+            # a "Nombre" cada vez que se escribía en otro campo del diálogo.
+            for control in dialogo.content.controls:
+                if isinstance(control, ft.TextField):
+                    control.focus()
+                    break
 
     def _cerrar(self) -> None:
         if self.dialogo is not None and self.raiz is not None and self.raiz.page is not None:
@@ -315,8 +351,8 @@ class ZonasView:
                     texto_boton: str = "Guardar") -> None:
         """Diálogo genérico: al_guardar() devuelve None si va bien o el error del controlador.
 
-        Si hay error, se enseña dentro del diálogo y se queda abierto. Enter en cualquier
-        campo de texto equivale a pulsar Guardar.
+        Si hay error, se enseña dentro del diálogo y se queda abierto. Enter pasa al
+        siguiente campo de texto y, en el último, equivale a pulsar Guardar.
         """
         aviso_error = ft.Text("", key="dialogo_error", color=tema.CRITICO, size=13, visible=False)
 
@@ -331,17 +367,20 @@ class ZonasView:
             self._cerrar()
             self._resultado(None, exito)
 
-        for campo in campos:
-            if isinstance(campo, ft.TextField):
-                campo.on_submit = guardar
+        textos = [campo for campo in campos if isinstance(campo, ft.TextField)]
+        for actual, siguiente in zip(textos, textos[1:]):
+            # s=siguiente: cada campo recuerda cuál va después (igual que r=ruta en el panel)
+            actual.on_submit = lambda _evento, s=siguiente: s.focus()
+        if textos:
+            textos[-1].on_submit = guardar
         contenido = list(campos)
         if nota:
-            contenido.append(ft.Text(nota, size=12, color=tema.TEXTO_SUAVE))
+            contenido.append(nota if isinstance(nota, ft.Control) else ft.Text(nota, size=12, color=tema.TEXTO_SUAVE))
         contenido.append(aviso_error)
         self._abrir(ft.AlertDialog(
             modal=True,
             title=ft.Text(titulo, color=tema.TEXTO, font_family=tema.FUENTE_TITULOS),
-            content=ft.Column(contenido, tight=True, spacing=12, width=420),
+            content=ft.Column(contenido, tight=True, spacing=12, width=440, scroll=ft.ScrollMode.AUTO),
             actions=[
                 ft.TextButton("Cancelar", key="dialogo_cancelar", on_click=lambda _evento: self._cerrar()),
                 tema.boton_primario(texto_boton, guardar, key="dialogo_guardar"),
@@ -349,7 +388,7 @@ class ZonasView:
         ))
 
     def _formulario_zona_nueva(self, _evento=None) -> None:
-        nombre = tema.campo_texto("Nombre", key="nueva_zona_nombre", autofocus=True)
+        nombre = tema.campo_texto("Nombre", key="test:nueva_zona_nombre")
         tipo = ft.Dropdown(label="Tipo de zona", key="nueva_zona_tipo", value="carpa",
                            options=opciones(NOMBRE_TIPO_ZONA))
         responsable = ft.Dropdown(label="Responsable", key="nueva_zona_responsable",
@@ -373,14 +412,28 @@ class ZonasView:
         if id_zona is None:
             return
         editando = sensor is not None
-        nombre = tema.campo_texto("Nombre", key="sensor_nombre", autofocus=True,
+        tipo_inicial = sensor.TIPO if editando else "temperatura"
+        recomendado = UMBRALES_RECOMENDADOS[tipo_inicial]
+        nombre = tema.campo_texto("Nombre", key="test:sensor_nombre",
                                   value=sensor.nombre if editando else "")
         tipo = ft.Dropdown(label="Qué mide", key="sensor_tipo", options=opciones(NOMBRE_TIPO_SENSOR),
-                           value=sensor.TIPO if editando else "temperatura", disabled=editando)
-        aviso = tema.campo_texto("Umbral de aviso", key="sensor_aviso",
-                                 value=str(sensor.umbral_aviso) if editando else "")
-        critico = tema.campo_texto("Umbral crítico", key="sensor_critico",
-                                   value=str(sensor.umbral_critico) if editando else "")
+                           value=tipo_inicial, disabled=editando)
+        # Al añadir, los umbrales salen rellenos con los recomendados (se pueden cambiar)
+        aviso = tema.campo_texto("Umbral de aviso", key="test:sensor_aviso",
+                                 value=str(sensor.umbral_aviso if editando else recomendado[0]))
+        critico = tema.campo_texto("Umbral crítico", key="test:sensor_critico",
+                                   value=str(sensor.umbral_critico if editando else recomendado[1]))
+        ayuda = ft.Column(spacing=6)
+        self._pintar_ayuda_umbrales(ayuda, tipo_inicial)
+
+        def cambiar_tipo(_evento=None):
+            """Al cambiar el tipo: umbrales recomendados del nuevo tipo y tabla resaltada."""
+            aviso.value, critico.value = (str(valor) for valor in UMBRALES_RECOMENDADOS[tipo.value])
+            self._pintar_ayuda_umbrales(ayuda, tipo.value)
+            if self.dialogo is not None and self.dialogo.page is not None:
+                self.dialogo.update()
+
+        tipo.on_change = cambiar_tipo
 
         def guardar():
             if editando:
@@ -393,14 +446,51 @@ class ZonasView:
             "Editar sensor" if editando else "Añadir sensor",
             [nombre, tipo, aviso, critico], guardar,
             "Sensor actualizado." if editando else "Sensor añadido.",
-            nota="Umbrales según la tabla del README. En luz y depósito el aviso es mayor que el crítico (son malos si bajan).",
+            nota=ayuda,
         )
+
+    @staticmethod
+    def _pintar_ayuda_umbrales(ayuda: ft.Column, tipo_elegido: str) -> None:
+        """Frase para el tipo elegido + tabla con los umbrales recomendados de todos los tipos."""
+        clase = CLASE_SENSOR[tipo_elegido]
+        minimo, maximo = clase.RANGO
+        if clase.INVERSO:
+            regla = "Alerta si BAJA: el aviso tiene que ser mayor que el crítico."
+        else:
+            regla = "Alerta si SUBE: el aviso tiene que ser menor que el crítico."
+        frase = ft.Text(f"{NOMBRE_TIPO_SENSOR[tipo_elegido]}: valores en {clase.UNIDAD}, "
+                        f"entre {minimo} y {maximo}. {regla}", size=12, color=tema.TEXTO)
+
+        def fila(celdas, negrita=False, fondo=None):
+            anchos = (130, 60, 60, 70, 70)
+            return ft.Container(
+                ft.Row([ft.Text(texto, size=11, width=ancho, color=tema.TEXTO,
+                                weight=ft.FontWeight.BOLD if negrita else None)
+                        for texto, ancho in zip(celdas, anchos)], spacing=6),
+                bgcolor=fondo, padding=ft.padding.symmetric(horizontal=8, vertical=3), border_radius=4,
+            )
+
+        filas = [fila(("Qué mide", "Aviso", "Crítico", "Unidad", "Alerta si"), negrita=True)]
+        for tipo, (aviso, critico) in UMBRALES_RECOMENDADOS.items():
+            datos = CLASE_SENSOR[tipo]
+            elegido = tipo == tipo_elegido
+            filas.append(fila(
+                (NOMBRE_TIPO_SENSOR[tipo], str(aviso), str(critico), datos.UNIDAD,
+                 "baja" if datos.INVERSO else "sube"),
+                negrita=elegido,
+                fondo=ft.Colors.with_opacity(0.10, tema.PRIMARIO) if elegido else None,
+            ))
+        ayuda.controls = [
+            frase,
+            ft.Text("Umbrales recomendados", size=12, weight=ft.FontWeight.BOLD, color=tema.TEXTO_SUAVE),
+            ft.Container(ft.Column(filas, spacing=0), border=ft.border.all(1, tema.BORDE), border_radius=6),
+        ]
 
     def _formulario_actuador(self, _evento=None) -> None:
         id_zona = self.id_seleccionada
         if id_zona is None:
             return
-        nombre = tema.campo_texto("Nombre", key="actuador_nombre", autofocus=True)
+        nombre = tema.campo_texto("Nombre", key="test:actuador_nombre")
         tipo = ft.Dropdown(label="Tipo", key="actuador_tipo", value="ventilador",
                            options=opciones(NOMBRE_TIPO_ACTUADOR))
 

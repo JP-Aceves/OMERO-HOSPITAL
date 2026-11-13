@@ -9,6 +9,7 @@ import flet as ft
 from controller.zonas_controller import ZonasController
 from model.usuario import Usuario
 from view import tema
+from view.zonas_view import resumen_zona
 
 NOMBRE_TIPO = {"carpa": "Carpa", "zona_tecnica": "Zona técnica", "exterior": "Exterior"}
 
@@ -47,8 +48,7 @@ class InicioView:
                 [
                     ft.Text(zona.nombre, size=18, weight=ft.FontWeight.BOLD, color=tema.TEXTO),
                     ft.Text(NOMBRE_TIPO.get(zona.tipo, zona.tipo), color=tema.TEXTO_SUAVE),
-                    ft.Text(f"{len(zona.sensores)} sensores · {len(zona.actuadores)} actuadores",
-                            color=tema.TEXTO_SUAVE, size=13),
+                    ft.Text(resumen_zona(zona), color=tema.TEXTO_SUAVE, size=13),
                 ],
                 spacing=4,
             ),

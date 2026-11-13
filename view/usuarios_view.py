@@ -45,6 +45,10 @@ class UsuariosView:
             border=ft.border.all(1, tema.BORDE),
             border_radius=8,
             column_spacing=24,
+            # Filas más altas que las 48 px por defecto para que el desplegable de rol
+            # quepa dentro de su fila y no pise las líneas.
+            data_row_min_height=68,
+            data_row_max_height=68,
         )
         tabla_desplazable = ft.Row([tabla], scroll=ft.ScrollMode.AUTO)
         contenido = ft.Column(
@@ -53,7 +57,9 @@ class UsuariosView:
                     "Gestión de usuarios", size=26, color=tema.TEXTO,
                     font_family=tema.FUENTE_TITULOS, weight=ft.FontWeight.BOLD,
                 ),
-                ft.Semantics(content=mensaje, live_region=True),
+                # Sin ft.Semantics: envolver un texto oculto con Semantics hace que
+                # Flet dibuje un recuadro gris en lugar de la pantalla.
+                mensaje,
                 tabla_desplazable,
             ],
             spacing=16,
@@ -143,10 +149,12 @@ class UsuariosView:
                 solicitar_eliminacion(nombre_usuario, evento)
 
             rol = ft.Dropdown(
-                label=f"Rol de {nombre_usuario}",
+                # Sin label: la cabecera de la columna ya dice "Rol" y el label flotante
+                # se salía de la fila. tooltip mantiene a quién pertenece el desplegable.
+                tooltip=f"Rol de {nombre_usuario}",
                 value=cuenta.ROL,
                 options=[ft.dropdown.Option(clave, titulo) for clave, titulo in _ROLES.items()],
-                width=220,
+                width=260,
                 color=tema.TEXTO,
                 border_color=tema.BORDE,
                 focused_border_color=tema.PRIMARIO,

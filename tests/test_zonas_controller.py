@@ -171,6 +171,12 @@ def test_anadir_sensor_asigna_id_s8_y_persiste(contexto):
         ("Z1", "Sensor", "temperatura", "10", "x", "Los umbrales deben ser números válidos"),
         ("Z1", "Sensor", "temperatura", "nan", "20", "Los umbrales deben ser números válidos"),
         ("Z1", "Sensor", "temperatura", "inf", "20", "Los umbrales deben ser números válidos"),
+        ("Z1", "Sensor", "temperatura", "28", "80", "Los umbrales deben estar entre 15 y 45 °C"),
+        ("Z1", "Sensor", "temperatura", "30", "30", "El umbral de aviso y el crítico no pueden ser iguales"),
+        ("Z1", "Sensor", "temperatura", "32", "28",
+         "En este sensor el aviso debe ser menor que el crítico (alerta si sube)"),
+        ("Z1", "Sensor", "nivel_deposito", "20", "50",
+         "En este sensor el aviso debe ser mayor que el crítico (alerta si baja)"),
     ],
 )
 def test_anadir_sensor_rechaza_datos_invalidos_sin_persistir(
@@ -202,6 +208,9 @@ def test_editar_sensor_actualiza_nombre_y_umbrales(contexto):
         ("Z1", "S1", " ", "1", "2", "El nombre del sensor es obligatorio"),
         ("Z1", "S1", "Nuevo", "x", "2", "Los umbrales deben ser números válidos"),
         ("Z1", "S1", "Nuevo", "1", "nan", "Los umbrales deben ser números válidos"),
+        ("Z1", "S1", "Nuevo", "10", "32", "Los umbrales deben estar entre 15 y 45 °C"),
+        ("Z1", "S1", "Nuevo", "33", "29",
+         "En este sensor el aviso debe ser menor que el crítico (alerta si sube)"),
     ],
 )
 def test_editar_sensor_rechaza_datos_invalidos_sin_persistir(
