@@ -121,6 +121,8 @@ Normas de trabajo con Git: ver [CONTRIBUTING.md](CONTRIBUTING.md).
 ]
 ```
 
+**Cómo simula (OME-33).** Cada ronda crea una lectura por sensor: el valor parte de la última lectura guardada, se acerca un 20 % a su valor normal (el centro de la zona verde) y suma una variación aleatoria pequeña; un 5 % de las veces da un pico más allá del umbral crítico (hacia abajo en los sensores INVERSO) y en la ronda siguiente vuelve a lo normal. El depósito no tiene picos: solo baja entre 0,5 y 2 puntos por ronda y se rellena al 90-100 % cuando baja del 10 %. Opciones: `--rondas`, `--minutos` (separación entre rondas, 5 por defecto) y `--semilla` (mismos valores en cada ejecución); si ya hay lecturas se añaden detrás, así que para empezar de cero borra `data/lecturas.json`.
+
 ## Umbrales (fuente: tabla "Umbrales iniciales por sensor" del documento del proyecto)
 
 | `tipo` | Sensor | Unidad | Aviso | Crítico | Malo si | Rango simulado |
