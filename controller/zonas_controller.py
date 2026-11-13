@@ -6,7 +6,7 @@ import math
 
 from model.actuador import Actuador
 from model.lista_enlazada import ListaEnlazada
-from model.sensor import crear_sensor
+from model.sensor import Sensor, crear_sensor
 from model.usuario import TecnicoLogistica, Usuario, ResponsableCarpa, JefeSanidad
 from model.zona import Zona
 from persistence.repositorio_json import RepositorioJSON
@@ -101,6 +101,9 @@ class ZonasController:
             })
         except (KeyError, ValueError):
             return "Selecciona un tipo de sensor válido"
+        error = self._validar_umbrales(sensor, aviso, critico)
+        if error:
+            return error
 
         try:
             zona.anadir_sensor(sensor)
@@ -126,6 +129,9 @@ class ZonasController:
         critico = self._convertir_umbral(umbral_critico)
         if aviso is None or critico is None:
             return "Los umbrales deben ser números válidos"
+        error = self._validar_umbrales(sensor, aviso, critico)
+        if error:
+            return error
 
         sensor.nombre = nombre
         sensor.umbral_aviso = aviso
@@ -219,6 +225,25 @@ class ZonasController:
             return "El usuario responsable no existe"
         if cuenta.ROL not in (ResponsableCarpa.ROL, TecnicoLogistica.ROL):
             return "Solo se puede asignar a responsables de carpa o técnicos de logística"
+        return None
+
+    @staticmethod
+    def _validar_umbrales(sensor: Sensor, aviso: float, critico: float) -> str | None:
+        """Comprueba que los umbrales tengan sentido para ese tipo de sensor.
+
+        - Dentro del RANGO del sensor (el mismo que usa el simulador).
+        - En el orden correcto: si el sensor es malo cuando sube, aviso < crítico;
+          si es INVERSO (luz, depósito), aviso > crítico.
+        """
+        minimo, maximo = sensor.RANGO
+        if not (minimo <= aviso <= maximo and minimo <= critico <= maximo):
+            return f"Los umbrales deben estar entre {minimo} y {maximo} {sensor.UNIDAD}"
+        if aviso == critico:
+            return "El umbral de aviso y el crítico no pueden ser iguales"
+        if sensor.INVERSO and aviso < critico:
+            return "En este sensor el aviso debe ser mayor que el crítico (alerta si baja)"
+        if not sensor.INVERSO and aviso > critico:
+            return "En este sensor el aviso debe ser menor que el crítico (alerta si sube)"
         return None
 
     @staticmethod

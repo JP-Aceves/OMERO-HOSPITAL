@@ -6,7 +6,7 @@ depender del ZonasController de Rodas ni de ficheros.
 from model.lista_enlazada import ListaEnlazada
 from model.usuario import JefeSanidad, ResponsableCarpa, TecnicoLogistica
 from model.zona import crear_zona
-from view.zonas_view import SIN_RESPONSABLE, ZonasView, resumen_zona
+from view.zonas_view import SIN_RESPONSABLE, ZonasView, cantidad, resumen_zona
 
 
 class ControladorFalso:
@@ -71,7 +71,13 @@ def campo(dialogo, clave):
 
 def test_resumen_de_una_zona():
     controlador = ControladorFalso()
-    assert resumen_zona(next(iter(controlador.zonas))) == "2 sensores · 1 actuadores"
+    assert resumen_zona(next(iter(controlador.zonas))) == "2 sensores · 1 actuador"
+
+
+def test_cantidad_usa_singular_solo_con_uno():
+    assert cantidad(1, "sensor", "sensores") == "1 sensor"
+    assert cantidad(0, "sensor", "sensores") == "0 sensores"
+    assert cantidad(3, "sensor", "sensores") == "3 sensores"
 
 
 def test_hay_una_tarjeta_por_zona_y_se_elige_la_primera():
@@ -123,7 +129,7 @@ def test_eliminar_sensor_llama_al_controlador():
 def test_nueva_zona_desde_el_formulario_y_queda_seleccionada():
     pantalla, controlador = vista()
     pantalla._formulario_zona_nueva()
-    campo(pantalla.dialogo, "nueva_zona_nombre").value = "Carpa 2"
+    campo(pantalla.dialogo, "test:nueva_zona_nombre").value = "Carpa 2"
     pantalla.dialogo.actions[1].on_click(None)   # botón Crear
     assert controlador.llamadas == [("crear_zona", "Carpa 2", "carpa", None)]
     assert pantalla.dialogo is None
@@ -133,7 +139,7 @@ def test_nueva_zona_desde_el_formulario_y_queda_seleccionada():
 def test_si_el_formulario_falla_se_queda_abierto_con_el_error():
     pantalla, _ = vista(error="El umbral debe ser un número")
     pantalla._formulario_sensor()
-    campo(pantalla.dialogo, "sensor_aviso").value = "abc"
+    campo(pantalla.dialogo, "test:sensor_aviso").value = "abc"
     pantalla.dialogo.actions[1].on_click(None)
     assert pantalla.dialogo is not None
     assert campo(pantalla.dialogo, "dialogo_error").value == "El umbral debe ser un número"
@@ -143,7 +149,7 @@ def test_editar_sensor_manda_los_umbrales_como_texto():
     pantalla, controlador = vista()
     sensor = next(iter(next(iter(controlador.zonas)).sensores))
     pantalla._formulario_sensor(sensor=sensor)
-    campo(pantalla.dialogo, "sensor_critico").value = "33"
+    campo(pantalla.dialogo, "test:sensor_critico").value = "33"
     pantalla.dialogo.actions[1].on_click(None)
     assert controlador.llamadas == [("editar_sensor", "Z1", "S1", "DHT22 temperatura", "28", "33")]
 

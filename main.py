@@ -74,7 +74,7 @@ def main(page: ft.Page) -> None:
         return UsuariosView(usuario, UsuariosController(repositorio)).construir()
 
     PANTALLAS = {
-        "/inicio": (contenido_inicio, "OME-40 / OME-32"),
+        "/inicio": (contenido_inicio, "OME-40"),
         "/zonas": (contenido_zonas, "OME-35"),
         "/usuarios": (contenido_usuarios, "OME-57"),
     }
