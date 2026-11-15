@@ -1,4 +1,4 @@
 Nombre: Alejandro Rodas
 Rol: Equipo de desarrollo
-Tareas: OME-23 · Pantalla de login
-Sprint: 1
+Tareas: OME-23 · Login; OME-36 · Identidad visual, Enter y responsive en login y registro
+Sprint: 2

@@ -19,5 +19,12 @@
     "rol": "tecnico_logistica",
     "sal": "841e342ea2e7232a7d8a2b06b1458d17",
     "hash": "85d7e977bd7e16a1562a2382ebf78416faa83243e29c5b8af19ae7f335d68fa9"
+  },
+  {
+    "nombre": "Administrador de prueba",
+    "usuario": "admin",
+    "rol": "administrador",
+    "sal": "18e2a3089a219987cf73c71a5b8dbcf8",
+    "hash": "23c63a8f442b6b6bc7d4817b2493099c2f4ed5ef42a0d52354cc8ac8bc5e9551"
   }
 ]

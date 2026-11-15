@@ -55,12 +55,18 @@ class TecnicoLogistica(Usuario):
     ROL = "tecnico_logistica"
 
 
+class Administrador(Usuario):
+    """Gestiona las cuentas de usuario. Responsable: Medina (OME-57)."""
+    ROL = "administrador"
+
+
 def crear_usuario(datos: dict) -> Usuario:
     """Crea la subclase correcta a partir de un dict leído del JSON."""
     roles = {
         "jefe_sanidad": JefeSanidad,
         "responsable_carpa": ResponsableCarpa,
         "tecnico_logistica": TecnicoLogistica,
+        "administrador": Administrador,
     }
     clase_usuario = roles.get(datos["rol"])
     if clase_usuario is None:

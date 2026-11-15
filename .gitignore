@@ -26,3 +26,6 @@ Thumbs.db
 # Credenciales (S2)
 .env
 config.local.ini
+
+# Datos generados por el simulador
+data/lecturas.json

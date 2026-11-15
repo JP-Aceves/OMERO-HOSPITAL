@@ -41,3 +41,27 @@ class RepositorioJSON:
             raise ValueError(f"El usuario '{usuario.usuario}' ya existe")
         self._usuarios.insertar(usuario)
         self.guardar(self._usuarios)
+
+    def actualizar(self, usuario: Usuario) -> None:
+        """Sustituye el usuario con ese nombre y conserva el orden."""
+        if self.buscar_por_usuario(usuario.usuario) is None:
+            raise ValueError(f"El usuario '{usuario.usuario}' no existe")
+
+        usuarios = ListaEnlazada()
+        for existente in self._usuarios:
+            usuarios.insertar(
+                usuario if existente.usuario == usuario.usuario else existente
+            )
+        self.guardar(usuarios)
+
+    def eliminar(self, nombre_usuario: str) -> bool:
+        """Elimina la cuenta por nombre. Devuelve False si no existe."""
+        if self.buscar_por_usuario(nombre_usuario) is None:
+            return False
+
+        usuarios = ListaEnlazada()
+        for existente in self._usuarios:
+            if existente.usuario != nombre_usuario:
+                usuarios.insertar(existente)
+        self.guardar(usuarios)
+        return True

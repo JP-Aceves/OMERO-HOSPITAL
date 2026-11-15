@@ -5,7 +5,13 @@ from pathlib import Path
 import pytest
 
 from model.lista_enlazada import ListaEnlazada
-from model.usuario import JefeSanidad, ResponsableCarpa, TecnicoLogistica, hashear
+from model.usuario import (
+    Administrador,
+    JefeSanidad,
+    ResponsableCarpa,
+    TecnicoLogistica,
+    hashear,
+)
 from persistence.repositorio_json import RepositorioJSON
 
 
@@ -120,11 +126,14 @@ def test_los_usuarios_de_prueba_son_uno_por_rol():
     jefe = repositorio.buscar_por_usuario("jefe")
     carpa = repositorio.buscar_por_usuario("carpa")
     logistica = repositorio.buscar_por_usuario("logistica")
+    admin = repositorio.buscar_por_usuario("admin")
 
-    assert len(repositorio.cargar()) == 3
+    assert len(repositorio.cargar()) == 4
     assert isinstance(jefe, JefeSanidad)
     assert isinstance(carpa, ResponsableCarpa)
     assert isinstance(logistica, TecnicoLogistica)
+    assert isinstance(admin, Administrador)
     assert jefe.verificar_password("omero123")
     assert carpa.verificar_password("omero123")
     assert logistica.verificar_password("omero123")
+    assert admin.verificar_password("omero123")

@@ -70,8 +70,9 @@ def test_registrar_rechaza_contrasenas_distintas_sin_guardar(controlador, reposi
     assert not repositorio.ruta.exists()
 
 
-def test_registrar_rechaza_un_rol_desconocido_sin_guardar(controlador, repositorio):
-    resultado = controlador.registrar("Ana", "ana", "omero123", "omero123", "administrador")
+@pytest.mark.parametrize("rol", ["administrador", "rol_desconocido"])
+def test_registro_publico_rechaza_roles_no_permitidos(controlador, repositorio, rol):
+    resultado = controlador.registrar("Ana", "ana", "omero123", "omero123", rol)
 
     assert resultado == "Selecciona un rol válido"
     assert not repositorio.ruta.exists()
