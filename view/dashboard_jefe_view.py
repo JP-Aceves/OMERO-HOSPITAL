@@ -8,6 +8,7 @@ from controller.dashboard_controller import DashboardController
 from model.usuario import Usuario
 from service.estado import AVISO, CRITICO, NORMAL
 from view import tema
+from view.alertas_view import AlertasView
 
 
 _ESTADOS = {
@@ -146,6 +147,7 @@ class DashboardJefeView:
         tarjetas = ft.ResponsiveRow(spacing=14, run_spacing=14)
         aviso = ft.Text(visible=False, color=tema.CRITICO, size=14)
         sin_zonas = ft.Text("Todavía no hay zonas configuradas.", color=tema.TEXTO_SUAVE)
+        alertas = AlertasView(self.usuario, self.controlador)
 
         def mostrar_resumen() -> None:
             zonas = self.controlador.resumen()
@@ -159,6 +161,7 @@ class DashboardJefeView:
             contadores.controls = etiquetas
             tarjetas.controls = [self._tarjeta(zona) for zona in zonas]
             sin_zonas.visible = not zonas
+            alertas.refrescar()
 
         def mostrar_error() -> None:
             aviso.value = "No se pudieron actualizar las lecturas. Vuelve a intentarlo."
@@ -167,11 +170,11 @@ class DashboardJefeView:
         async def actualizar(_evento: ft.ControlEvent) -> None:
             try:
                 self.controlador.actualizar()
+                mostrar_resumen()
             except OSError:
                 mostrar_error()
             else:
                 aviso.visible = False
-                mostrar_resumen()
             if contenido.page is not None:
                 contenido.update()
 
@@ -198,15 +201,16 @@ class DashboardJefeView:
                 aviso,
                 tarjetas,
                 sin_zonas,
+                alertas.construir(),
             ],
             spacing=14,
             horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
         )
         try:
             self.controlador.inicializar()
+            mostrar_resumen()
         except OSError:
             mostrar_error()
-        mostrar_resumen()
         return contenido
 
     def _tarjeta(self, zona: dict) -> ft.Control:

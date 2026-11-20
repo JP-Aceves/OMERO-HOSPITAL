@@ -10,7 +10,23 @@ class Alerta:
 
     def __init__(self, zona: str, sensor: str, tipo: str, valor: float, unidad: str,
                  nivel: str, fecha_hora: str) -> None:
-        raise NotImplementedError("OME-60")
+        if nivel not in ("aviso", "critico"):
+            raise ValueError("Una alerta debe ser de aviso o critica")
+        self.zona = zona
+        self.sensor = sensor
+        self.tipo = tipo
+        self.valor = valor
+        self.unidad = unidad
+        self.nivel = nivel
+        self.fecha_hora = fecha_hora
 
     def to_dict(self) -> dict:
-        raise NotImplementedError("OME-60")
+        return {
+            "zona": self.zona,
+            "sensor": self.sensor,
+            "tipo": self.tipo,
+            "valor": self.valor,
+            "unidad": self.unidad,
+            "nivel": self.nivel,
+            "fecha_hora": self.fecha_hora,
+        }

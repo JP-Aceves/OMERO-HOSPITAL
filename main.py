@@ -83,7 +83,10 @@ def main(page: ft.Page) -> None:
                 return DashboardTecnicoView(usuario, tecnico).construir()
         except NotImplementedError:
             pass  # hasta que su dashboard esté mergeado, sigue el inicio del Sprint 2
-        return InicioView(usuario, ZonasController(RepositorioZonas(), repositorio)).construir()
+        return InicioView(
+            usuario, ZonasController(RepositorioZonas(), repositorio),
+            dashboard=nuevo_dashboard(),
+        ).construir()
 
     def contenido_pendiente(usuario):
         return PendienteView(usuario).construir()  # OME-61
