@@ -3,6 +3,7 @@ from datetime import datetime
 
 from model.lectura import Lectura
 from model.lista_enlazada import ListaEnlazada
+from model.usuario import Usuario
 from persistence.repositorio_lecturas import RepositorioLecturas
 from persistence.repositorio_zonas import RepositorioZonas
 from service.estado import AVISO, CRITICO, NORMAL, estado_sensor, peor_estado
@@ -96,3 +97,13 @@ class DashboardController:
         """Pide una ronda nueva al simulador."""
         # El simulador ya guarda la ronda y puede usar otro repositorio en memoria.
         self._ultima_ronda = self.simulador.generar_ronda()
+
+    def alertas(self, usuario: Usuario | None = None) -> list[dict]:
+        """Alertas activas de la última ronda (OME-60, Medina). Usa service/alertas.py.
+
+        Sin usuario, todas (dashboard del jefe); con usuario, solo las de sus zonas.
+        [{"zona": "Z1", "zona_nombre": "Carpa de hospitalización", "sensor": "S1",
+          "sensor_nombre": "DHT22 temperatura", "valor": 33.2, "unidad": "°C",
+          "nivel": "critico", "fecha_hora": "2026-11-24T18:30:00"}, ...]
+        """
+        raise NotImplementedError("OME-60")
