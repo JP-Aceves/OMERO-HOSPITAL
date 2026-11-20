@@ -92,6 +92,25 @@ Tests: `pytest`
 
 Normas de trabajo con Git: ver [CONTRIBUTING.md](CONTRIBUTING.md).
 
+### Contratos del Sprint 3 (OME-59)
+
+Clases y funciones vacías con sus firmas y `raise NotImplementedError("OME-XX")`. Cada uno rellena las suyas sin cambiar las firmas sin avisar.
+
+| Archivo | Qué es | Quién |
+|---|---|---|
+| `model/usuario.py` · `Pendiente` | Cuenta registrada sin rol | Mariana (OME-61) |
+| `controller/registro_controller.py` · `registrar_pendiente()` | Registro sin rol | Mariana (OME-61) |
+| `controller/usuarios_controller.py` · `pendientes()`, `aprobar()`, `crear_cuenta()` | El admin aprueba y crea cuentas | Mariana (OME-61) |
+| `view/pendiente_view.py` | Pantalla "Cuenta pendiente" | Mariana (OME-61) |
+| `model/alerta.py`, `service/alertas.py` | Alertas de aviso y crítico | Medina (OME-60) |
+| `controller/dashboard_controller.py` · `alertas()` | Alertas activas, todas o de un usuario | Medina (OME-60) |
+| `service/prediccion.py` | Regresión lineal del vaciado del depósito | Ivan (OME-65) |
+| `controller/actuadores_controller.py` | Encender y apagar ventilador y LED | Rodas (OME-66) |
+| `controller/carpa_controller.py`, `view/dashboard_carpa_view.py` | Dashboard "Mi carpa" | Rodas (OME-62) |
+| `controller/tecnico_controller.py`, `view/dashboard_tecnico_view.py` | Dashboard "Recursos" | Ivan (OME-63) |
+
+Mientras un dashboard no esté hecho, `main.py` sigue enseñando el inicio del Sprint 2 (o "en construcción"), así la app no se rompe.
+
 ## Formato de los datos (A-03)
 
 `data/zonas.json`: cada zona con sus sensores y actuadores. `responsable` es el nombre de usuario asignado (o `null`).
@@ -146,7 +165,7 @@ Tipos de zona: `carpa`, `zona_tecnica`, `exterior`. Tipos de actuador: `ventilad
 
 - [x] Sprint 0 · Anteproyecto, Product Backlog y mockups
 - [x] Sprint 1 · Estructura base y autenticación (`v0.1-sprint1`)
-- [ ] Sprint 2 · Gestión de datos (CRUD) y simulador de sensores
+- [x] Sprint 2 · Gestión de datos (CRUD) y simulador de sensores (`v0.2-sprint2`)
 - [ ] Sprint 3 · Dashboards, alertas y estadística
 - [ ] Sprint 4 · Optimización y entrega final
 
@@ -158,6 +177,7 @@ Tipos de zona: `carpa`, `zona_tecnica`, `exterior`. Tipos de actuador: `ventilad
 | Jose Aceves | @JP-Aceves |
 | Alejandro Rodas | @AlejandroRodasSamblasUniversidadEuropea |
 | Ivan Sanz | @ivansnzlpz |
+| Mariana Mora | |
 
 Docente: Jorge García González
 
