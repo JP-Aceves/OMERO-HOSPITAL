@@ -146,9 +146,15 @@ def test_inicializar_conserva_historial_aunque_falten_lecturas_de_un_sensor(tmp_
     assert dashboard.resumen()[1]["sensores"][0]["valor"] is None
 
 
+class _ZonasDelSimuladorDePrueba:
+    def recargar(self):
+        pass  # este simulador de prueba no usa zonas
+
+
 class SimuladorDePrueba:
     def __init__(self, repositorio, rondas):
         self.repositorio = repositorio
+        self.repo_zonas = _ZonasDelSimuladorDePrueba()  # OME-64 lo recarga en actualizar()
         self.rondas = iter(rondas)
         self.llamadas = 0
 
