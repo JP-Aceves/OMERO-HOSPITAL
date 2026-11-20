@@ -31,3 +31,11 @@ class RegistroController:
         except ValueError:
             return "Ese usuario ya existe"
         return None
+
+    def registrar_pendiente(self, nombre: str, usuario: str, contrasena: str, repetir: str) -> str | None:
+        """Como registrar(), pero sin rol: la cuenta se crea como Pendiente (OME-61, Mariana).
+
+        Cuando esté hecho, registro_view deja de pedir el rol y llama a este método.
+        Devuelve None si se registró, o el mensaje de error.
+        """
+        raise NotImplementedError("OME-61")

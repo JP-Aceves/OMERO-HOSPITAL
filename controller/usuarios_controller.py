@@ -69,6 +69,26 @@ class UsuariosController:
             return "El usuario no existe"
         return None
 
+    # ---------- Sprint 3 · cuentas pendientes (OME-61, Mariana) ----------
+
+    def pendientes(self) -> ListaEnlazada:
+        """Cuentas con rol "pendiente", para enseñarlas arriba en la tabla del admin."""
+        raise NotImplementedError("OME-61")
+
+    def aprobar(self, usuario: str, rol: str) -> str | None:
+        """Asigna un rol a una cuenta pendiente. None si va bien, o el mensaje de error.
+
+        Errores: el usuario no existe, la cuenta no está pendiente o el rol no es válido.
+        """
+        raise NotImplementedError("OME-61")
+
+    def crear_cuenta(self, nombre: str, usuario: str, contrasena: str, repetir: str, rol: str) -> str | None:
+        """Alta directa desde Gestión de usuarios, ya con rol. Reutiliza RegistroController.
+
+        None si se creó, o el mensaje de error (los mismos que el registro).
+        """
+        raise NotImplementedError("OME-61")
+
     def _hay_otro_administrador(self, usuario: str) -> bool:
         return any(
             cuenta.ROL == Administrador.ROL and cuenta.usuario != usuario

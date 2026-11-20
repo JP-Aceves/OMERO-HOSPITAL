@@ -38,3 +38,9 @@ def test_cada_ruta_del_menu_se_puede_abrir():
     for rol, menu in MENU_POR_ROL.items():
         for _, ruta in menu:
             assert puede_acceder(rol, ruta)
+
+
+def test_una_cuenta_pendiente_solo_ve_su_aviso():
+    assert ruta_inicial("pendiente") == "/pendiente"
+    for ruta in ("/inicio", "/zonas", "/usuarios"):
+        assert not puede_acceder("pendiente", ruta)

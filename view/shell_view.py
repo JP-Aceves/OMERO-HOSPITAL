@@ -23,12 +23,14 @@ NOMBRE_ROL = {
     "jefe_sanidad": "Jefe de sanidad",
     "responsable_carpa": "Responsable de carpa",
     "tecnico_logistica": "Técnico de logística",
+    "pendiente": "Cuenta pendiente",
 }
 
 ICONO_RUTA = {
     "/inicio": ft.Icons.DASHBOARD_OUTLINED,
     "/zonas": ft.Icons.MAP_OUTLINED,
     "/usuarios": ft.Icons.PEOPLE_OUTLINE,
+    "/pendiente": ft.Icons.HOURGLASS_EMPTY,
 }
 
 ANCHO_PANEL = 260

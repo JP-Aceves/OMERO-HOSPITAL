@@ -7,9 +7,12 @@ dentro del panel lateral (ShellView).
 import flet as ft
 
 from controller import navegacion
+from controller.actuadores_controller import ActuadoresController
+from controller.carpa_controller import CarpaController
 from controller.dashboard_controller import DashboardController
 from controller.login_controller import LoginController
 from controller.registro_controller import RegistroController
+from controller.tecnico_controller import TecnicoController
 from controller.usuarios_controller import UsuariosController
 from controller.zonas_controller import ZonasController
 from persistence.repositorio_json import RepositorioJSON
@@ -17,9 +20,12 @@ from persistence.repositorio_lecturas import RepositorioLecturas
 from persistence.repositorio_zonas import RepositorioZonas
 from service.simulador import Simulador
 from view import tema
+from view.dashboard_carpa_view import DashboardCarpaView
 from view.dashboard_jefe_view import DashboardJefeView
+from view.dashboard_tecnico_view import DashboardTecnicoView
 from view.inicio_view import InicioView
 from view.login_view import LoginView
+from view.pendiente_view import PendienteView
 from view.registro_view import RegistroView
 from view.shell_view import ShellView
 from view.tema import registrar_fuentes
@@ -60,12 +66,27 @@ def main(page: ft.Page) -> None:
 
     # ---------- qué hay dentro de cada ruta ----------
 
+    def nuevo_dashboard():
+        return DashboardController(RepositorioZonas(), RepositorioLecturas(),
+                                   Simulador(RepositorioZonas(), RepositorioLecturas()))
+
     def contenido_inicio(usuario):
         if usuario.ROL == "jefe_sanidad":
-            dashboard = DashboardController(RepositorioZonas(), RepositorioLecturas(),
-                                            Simulador(RepositorioZonas(), RepositorioLecturas()))
-            return DashboardJefeView(usuario, dashboard).construir()
+            return DashboardJefeView(usuario, nuevo_dashboard()).construir()
+        try:
+            if usuario.ROL == "responsable_carpa":  # OME-62
+                carpa = CarpaController(nuevo_dashboard(), ActuadoresController(RepositorioZonas()))
+                return DashboardCarpaView(usuario, carpa).construir()
+            if usuario.ROL == "tecnico_logistica":  # OME-63
+                tecnico = TecnicoController(nuevo_dashboard(), ActuadoresController(RepositorioZonas()),
+                                            RepositorioLecturas())
+                return DashboardTecnicoView(usuario, tecnico).construir()
+        except NotImplementedError:
+            pass  # hasta que su dashboard esté mergeado, sigue el inicio del Sprint 2
         return InicioView(usuario, ZonasController(RepositorioZonas(), repositorio)).construir()
+
+    def contenido_pendiente(usuario):
+        return PendienteView(usuario).construir()  # OME-61
 
     def contenido_zonas(usuario):
         return ZonasView(usuario, ZonasController(RepositorioZonas(), repositorio)).construir()
@@ -77,6 +98,7 @@ def main(page: ft.Page) -> None:
         "/inicio": (contenido_inicio, "OME-40"),
         "/zonas": (contenido_zonas, "OME-35"),
         "/usuarios": (contenido_usuarios, "OME-57"),
+        "/pendiente": (contenido_pendiente, "OME-61"),
     }
 
     def construir_contenido(ruta, usuario):

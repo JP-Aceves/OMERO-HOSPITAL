@@ -1,11 +1,15 @@
 def test_los_modulos_se_importan():
+    import controller.actuadores_controller
+    import controller.carpa_controller
     import controller.dashboard_controller
     import controller.login_controller
     import controller.navegacion
     import controller.registro_controller
+    import controller.tecnico_controller
     import controller.usuarios_controller
     import controller.zonas_controller
     import model.actuador
+    import model.alerta
     import model.lectura
     import model.lista_enlazada
     import model.sensor
@@ -14,11 +18,16 @@ def test_los_modulos_se_importan():
     import persistence.repositorio_json
     import persistence.repositorio_lecturas
     import persistence.repositorio_zonas
+    import service.alertas
     import service.estado
+    import service.prediccion
     import service.simulador
+    import view.dashboard_carpa_view
     import view.dashboard_jefe_view
+    import view.dashboard_tecnico_view
     import view.inicio_view
     import view.login_view
+    import view.pendiente_view
     import view.registro_view
     import view.shell_view
     import view.tema
@@ -41,7 +50,7 @@ def test_todos_los_roles_tienen_menu():
     from controller.navegacion import MENU_POR_ROL
 
     assert set(MENU_POR_ROL) == {"administrador", "jefe_sanidad",
-                                 "responsable_carpa", "tecnico_logistica"}
+                                 "responsable_carpa", "tecnico_logistica", "pendiente"}
 
 
 def test_solo_luz_y_deposito_son_inversos():
@@ -58,3 +67,15 @@ def test_unidades_acordadas():
     assert unidades == {"temperatura": "°C", "humedad": "%", "calidad_aire": "%",
                         "luz": "%", "humo_gas": "%", "nivel_deposito": "%",
                         "viento": "km/h"}
+
+
+def test_la_cuenta_pendiente_tiene_su_rol():
+    from model.usuario import Pendiente
+
+    assert Pendiente.ROL == "pendiente"
+
+
+def test_la_prediccion_pide_al_menos_5_lecturas():
+    from service.prediccion import MINIMO_LECTURAS
+
+    assert MINIMO_LECTURAS == 5

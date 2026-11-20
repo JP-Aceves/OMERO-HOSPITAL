@@ -1,6 +1,8 @@
 """Qué pantallas ve cada rol y a dónde va tras el login. Responsable: JP (OME-25).
 
-El "/inicio" del jefe de sanidad es su dashboard (OME-40, DashboardJefeView).
+El "/inicio" de cada rol es su dashboard: jefe (OME-40), responsable de carpa
+(OME-62) y técnico de logística (OME-63). Una cuenta pendiente (OME-61) solo
+ve "/pendiente" hasta que el administrador le asigna un rol.
 MENU_POR_ROL es configuración fija, no datos de la app: por eso puede ser dict y list.
 """
 
@@ -9,6 +11,7 @@ MENU_POR_ROL: dict[str, list[tuple[str, str]]] = {
     "jefe_sanidad": [("Estado global", "/inicio"), ("Zonas y sensores", "/zonas")],
     "responsable_carpa": [("Mi carpa", "/inicio")],
     "tecnico_logistica": [("Recursos", "/inicio")],
+    "pendiente": [("Cuenta pendiente", "/pendiente")],
 }
 
 

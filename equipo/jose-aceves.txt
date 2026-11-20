@@ -1,4 +1,4 @@
 Nombre: Jose Aceves
-Rol: Product Owner
-Tareas: OME-56 · Contratos del Sprint 2, OME-25 · Panel lateral, inicio por rol y navegación, OME-35 · Pantalla de zonas y sensores, OME-38 · Backlog, requisitos, documento y release
-Sprint: 2
+Rol: Equipo de desarrollo
+Tareas: OME-59 · Contratos del Sprint 3, OME-64 · Umbrales que se aplican en la siguiente lectura
+Sprint: 3
