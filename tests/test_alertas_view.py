@@ -97,6 +97,23 @@ def test_sin_alertas_muestra_el_estado_vacio(usuario, dashboard):
     )
 
 
+def test_error_al_cargar_no_muestra_un_falso_estado_sin_alertas(usuario, dashboard):
+    dashboard.alertas.side_effect = OSError("No se puede leer")
+
+    contenido = AlertasView(usuario, dashboard).construir()
+
+    assert any(
+        isinstance(control, ft.Text) and control.visible
+        and control.value == "No se pudieron cargar las alertas. Vuelve a intentarlo."
+        for control in _controles(contenido)
+    )
+    assert not any(
+        isinstance(control, ft.Text) and control.visible
+        and control.value == "No hay alertas activas en tus zonas."
+        for control in _controles(contenido)
+    )
+
+
 def test_inicio_conserva_el_constructor_sin_dashboard(usuario):
     zonas = Mock()
     zonas.listar.return_value = ListaEnlazada()
@@ -174,6 +191,22 @@ def test_error_de_inicializacion_conserva_las_alertas_cargadas(usuario, dashboar
     )
 
 
+def test_error_de_lectura_tras_actualizar_conserva_la_lista_previa(usuario, dashboard):
+    zonas = Mock()
+    zonas.listar.return_value = ListaEnlazada()
+    contenido = InicioView(usuario, zonas, dashboard).construir()
+    dashboard.alertas.side_effect = OSError("No se puede leer")
+
+    asyncio.run(_boton(contenido, "Actualizar alertas").on_click(None))
+
+    assert "Temperatura" in _textos(contenido)
+    assert any(
+        isinstance(control, ft.Text) and control.visible
+        and control.value == "No se pudieron actualizar las alertas. Vuelve a intentarlo."
+        for control in _controles(contenido)
+    )
+
+
 def test_dashboard_jefe_refresca_tambien_el_panel_de_alertas(dashboard):
     jefe = JefeSanidad("Jefe", "jefe", "hash", "sal")
     contenido = DashboardJefeView(jefe, dashboard).construir()
@@ -185,3 +218,16 @@ def test_dashboard_jefe_refresca_tambien_el_panel_de_alertas(dashboard):
     dashboard.alertas.assert_called_with(jefe)
     assert "Temperatura" not in _textos(contenido)
     assert "0 activas" in _textos(contenido)
+
+
+def test_dashboard_jefe_no_se_rompe_si_no_puede_leer_alertas(dashboard):
+    jefe = JefeSanidad("Jefe", "jefe", "hash", "sal")
+    dashboard.alertas.side_effect = OSError("No se puede leer")
+
+    contenido = DashboardJefeView(jefe, dashboard).construir()
+
+    assert any(
+        isinstance(control, ft.Text) and control.visible
+        and control.value == "No se pudieron actualizar las lecturas. Vuelve a intentarlo."
+        for control in _controles(contenido)
+    )
