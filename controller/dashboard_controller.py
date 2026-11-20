@@ -96,6 +96,11 @@ class DashboardController:
 
     def actualizar(self) -> None:
         """Pide una ronda nueva al simulador."""
+        # OME-64 (HU-09): antes de cada lectura se releen las zonas, así un umbral
+        # cambiado en "Zonas y sensores" se aplica en la siguiente lectura.
+        self.repo_zonas.recargar()
+        if self.simulador.repo_zonas is not self.repo_zonas:
+            self.simulador.repo_zonas.recargar()
         # El simulador ya guarda la ronda y puede usar otro repositorio en memoria.
         self._ultima_ronda = self.simulador.generar_ronda()
 

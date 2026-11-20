@@ -21,6 +21,15 @@ class RepositorioZonas:
                     zonas.insertar(crear_zona(datos))
         return zonas
 
+    def recargar(self) -> None:
+        """Vuelve a leer el JSON por si otra pantalla lo cambió (OME-64).
+
+        Cada pantalla crea su propio repositorio: sin esto, el dashboard seguiría
+        usando los umbrales que había al abrirlo aunque el jefe los cambie en
+        "Zonas y sensores".
+        """
+        self._zonas = self.cargar()
+
     def guardar(self) -> None:
         """Escribe todas las zonas en el JSON."""
         self.ruta.parent.mkdir(parents=True, exist_ok=True)
