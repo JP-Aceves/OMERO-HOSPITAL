@@ -60,6 +60,15 @@ class Administrador(Usuario):
     ROL = "administrador"
 
 
+class Pendiente(Usuario):
+    """Cuenta recién registrada, todavía sin rol. Responsable: Mariana (OME-61).
+
+    Solo ve la pantalla "Cuenta pendiente" hasta que el administrador le asigna
+    un rol. Mariana: añadirla a crear_usuario cuando implemente el registro.
+    """
+    ROL = "pendiente"
+
+
 def crear_usuario(datos: dict) -> Usuario:
     """Crea la subclase correcta a partir de un dict leído del JSON."""
     roles = {
