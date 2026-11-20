@@ -17,6 +17,74 @@ _ESTADOS = {
 }
 
 
+def _punto_estado(estado: str, *, activo: bool = True, diametro: int = 10) -> ft.Control:
+    color = _ESTADOS[estado][2]
+    return ft.Container(
+        width=diametro, height=diametro, border_radius=diametro,
+        bgcolor=color if activo else ft.Colors.with_opacity(0.15, color),
+        border=ft.border.all(1, color if activo else tema.BORDE),
+        tooltip=_ESTADOS[estado][0].capitalize(),
+    )
+
+
+def _indicador_estado(estado: str) -> ft.Control:
+    return ft.Row(
+        [
+            _punto_estado(estado),
+            ft.Text(_ESTADOS[estado][0].capitalize(), size=12, color=_ESTADOS[estado][2]),
+        ],
+        spacing=5, tight=True,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
+
+def _semaforo_zona(estado: str) -> ft.Control:
+    return ft.Column(
+        [
+            ft.Container(
+                content=ft.Row(
+                    [_punto_estado(nivel, activo=nivel == estado, diametro=13) for nivel in _ESTADOS],
+                    spacing=5, tight=True,
+                ),
+                padding=6, border_radius=12, bgcolor=tema.FONDO,
+                border=ft.border.all(1, tema.BORDE),
+                tooltip=f"Estado de la zona: {_ESTADOS[estado][0]}",
+            ),
+            ft.Text(
+                _ESTADOS[estado][0].capitalize(), size=12,
+                weight=ft.FontWeight.W_600, color=_ESTADOS[estado][2],
+            ),
+        ],
+        spacing=3, tight=True,
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
+
+def _leyenda_estados() -> ft.Control:
+    colores = {NORMAL: "Verde", AVISO: "Amarillo", CRITICO: "Rojo"}
+    return ft.Row(
+        [
+            ft.Text("Semáforo", size=13, color=tema.TEXTO_SUAVE),
+            *[
+                ft.Row(
+                    [
+                        _punto_estado(estado),
+                        ft.Text(
+                            f"{colores[estado]} · {_ESTADOS[estado][0].capitalize()}",
+                            size=13, color=tema.TEXTO,
+                        ),
+                    ],
+                    spacing=6, tight=True,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                )
+                for estado in _ESTADOS
+            ],
+        ],
+        spacing=16, run_spacing=8, wrap=True,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
+
 class _TiempoActualizacion(ft.Text):
     def __init__(self) -> None:
         super().__init__(size=13, color=tema.TEXTO_SUAVE)
@@ -126,6 +194,7 @@ class DashboardJefeView:
                     vertical_alignment=ft.CrossAxisAlignment.CENTER, run_spacing=12,
                 ),
                 contadores,
+                _leyenda_estados(),
                 aviso,
                 tarjetas,
                 sin_zonas,
@@ -160,7 +229,7 @@ class DashboardJefeView:
                                 zona["nombre"], expand=True, size=17,
                                 color=tema.TEXTO, weight=ft.FontWeight.BOLD,
                             ),
-                            tema.etiqueta_estado(estado, _ESTADOS[estado][0].capitalize()),
+                            _semaforo_zona(estado),
                         ],
                         vertical_alignment=ft.CrossAxisAlignment.START,
                     ),
@@ -182,14 +251,13 @@ class DashboardJefeView:
             lectura = ft.Text("Sin lectura", size=13, color=tema.TEXTO_SUAVE)
         else:
             numero = f"{valor:g}".replace(".", ",")
-            estado, _, color = _ESTADOS[sensor["estado"]]
             lectura = ft.Column(
                 [
                     ft.Text(
                         f"{numero} {sensor['unidad']}", size=15,
                         color=tema.TEXTO, weight=ft.FontWeight.BOLD,
                     ),
-                    ft.Text(estado.capitalize(), size=12, color=color),
+                    _indicador_estado(sensor["estado"]),
                 ],
                 spacing=1,
                 horizontal_alignment=ft.CrossAxisAlignment.END,

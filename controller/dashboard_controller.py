@@ -1,5 +1,7 @@
 """Datos del dashboard del jefe de sanidad. Responsable: Medina (OME-40)."""
 from datetime import datetime
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from model.lectura import Lectura
 from model.lista_enlazada import ListaEnlazada
@@ -25,15 +27,18 @@ class DashboardController:
         self.ultima_actualizacion: datetime | None = None
 
     def inicializar(self) -> None:
-        """Genera la primera ronda si hay sensores y ninguno tiene lecturas."""
+        """Sincroniza los semáforos y genera la primera ronda si faltan lecturas."""
         hay_sensores = False
         for zona in self.repo_zonas.listar():
             for sensor in zona.sensores:
                 hay_sensores = True
                 if self._ultima_lectura(zona.id, sensor.id) is not None:
+                    self._sincronizar_semaforos()
                     return
         if hay_sensores:
             self.actualizar()
+        else:
+            self._sincronizar_semaforos()
 
     def _ultima_lectura(self, zona_id: str, sensor_id: str) -> Lectura | None:
         lectura = self._ultima_ronda.buscar(
@@ -54,9 +59,12 @@ class DashboardController:
         Si un sensor aún no tiene lecturas: "valor": None y "estado": "normal".
         La list solo se crea aquí para entregar los datos a la vista; los datos viven en ListaEnlazada.
         """
+        return self._resumen_zonas(self.repo_zonas.listar())
+
+    def _resumen_zonas(self, zonas_modelo: ListaEnlazada) -> list[dict]:
         zonas = []
         ultima_actualizacion = None
-        for zona in self.repo_zonas.listar():
+        for zona in zonas_modelo:
             sensores = []
             estados = ListaEnlazada()
             for sensor in zona.sensores:
@@ -102,6 +110,35 @@ class DashboardController:
             self.simulador.repo_zonas.recargar()
         # El simulador ya guarda la ronda y puede usar otro repositorio en memoria.
         self._ultima_ronda = self.simulador.generar_ronda()
+        self._sincronizar_semaforos()
+
+    def _sincronizar_semaforos(self) -> None:
+        # Otro controlador puede haber cambiado umbrales o actuadores desde el login.
+        repositorio = RepositorioZonas(self.repo_zonas.ruta)
+        cambios = False
+        for resumen in self._resumen_zonas(repositorio.listar()):
+            zona = repositorio.buscar(resumen["id"])
+            for actuador in zona.actuadores:
+                if actuador.tipo == "led_semaforo":
+                    if actuador.estado != resumen["estado"] or not actuador.encendido:
+                        actuador.fijar_estado(resumen["estado"])
+                        actuador.encender()
+                        cambios = True
+        if cambios:
+            # Publica el JSON completo para poder reintentar si falla la escritura.
+            ruta = repositorio.ruta
+            with NamedTemporaryFile(
+                dir=ruta.parent, prefix=f".{ruta.name}-", suffix=".tmp", delete=False,
+            ) as temporal:
+                ruta_temporal = Path(temporal.name)
+            try:
+                repositorio.ruta = ruta_temporal
+                repositorio.guardar()
+                ruta_temporal.replace(ruta)
+            finally:
+                repositorio.ruta = ruta
+                ruta_temporal.unlink(missing_ok=True)
+        self.repo_zonas = repositorio
 
     def alertas(self, usuario: Usuario | None = None) -> list[dict]:
         """Alertas activas de la última ronda (OME-60, Medina). Usa service/alertas.py.
