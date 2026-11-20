@@ -25,7 +25,8 @@ def guardar_lecturas(repositorio, *lecturas):
 
 
 class SimuladorDePrueba:
-    def __init__(self, repositorio, rondas=()):
+    def __init__(self, repo_zonas, repositorio, rondas=()):
+        self.repo_zonas = repo_zonas
         self.repositorio = repositorio
         self.rondas = iter(rondas)
         self.llamadas = 0
@@ -48,7 +49,7 @@ def contexto(tmp_path):
     for zona in (carpa, tecnica, exterior):
         zonas.anadir(zona)
     lecturas = RepositorioLecturas(tmp_path / "lecturas.json")
-    simulador = SimuladorDePrueba(RepositorioLecturas(lecturas.ruta))
+    simulador = SimuladorDePrueba(zonas, RepositorioLecturas(lecturas.ruta))
     return zonas, lecturas, DashboardController(zonas, lecturas, simulador), simulador
 
 
@@ -122,7 +123,7 @@ def test_una_lectura_normal_posterior_resuelve_la_alerta_historica(contexto):
 def test_no_resucita_una_ronda_en_memoria_mas_antigua_que_el_json(contexto):
     zonas, lecturas, _, _ = contexto
     simulador = SimuladorDePrueba(
-        RepositorioLecturas(lecturas.ruta),
+        zonas, RepositorioLecturas(lecturas.ruta),
         [(Lectura("Z1", "S1", "temperatura", 33, "°C", "2026-11-20T18:00:00"),)],
     )
     dashboard = DashboardController(zonas, lecturas, simulador)
@@ -142,7 +143,7 @@ def test_al_reabrir_la_sesion_se_conservan_las_alertas_activas(contexto):
     primero = {alerta["sensor"]: alerta for alerta in dashboard.alertas()}
     reabierto = DashboardController(
         RepositorioZonas(zonas.ruta), RepositorioLecturas(lecturas.ruta),
-        SimuladorDePrueba(RepositorioLecturas(lecturas.ruta)),
+        SimuladorDePrueba(RepositorioZonas(zonas.ruta), RepositorioLecturas(lecturas.ruta)),
     )
 
     assert {alerta["sensor"]: alerta for alerta in reabierto.alertas()} == primero
