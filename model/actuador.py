@@ -4,7 +4,10 @@
 class Actuador:
     TIPOS = ("ventilador", "led_semaforo", "led_evacuacion")
 
-    def __init__(self, id: str, nombre: str, tipo: str, encendido: bool = False) -> None:
+    def __init__(
+        self, id: str, nombre: str, tipo: str, encendido: bool = False,
+        estado: str | None = None,
+    ) -> None:
         """ValueError si el tipo no está en TIPOS."""
         if tipo not in self.TIPOS:
             raise ValueError(f"Tipo de actuador desconocido: {tipo}")
@@ -12,6 +15,9 @@ class Actuador:
         self.nombre = nombre
         self.tipo = tipo
         self.encendido = encendido
+        self.estado: str | None = None
+        if estado is not None:
+            self.fijar_estado(estado)
 
     def encender(self) -> None:
         self.encendido = True
@@ -19,14 +25,23 @@ class Actuador:
     def apagar(self) -> None:
         self.encendido = False
 
+    def fijar_estado(self, estado: str) -> None:
+        """Fija el color lógico del semáforo, conservando su encendido."""
+        if self.tipo != "led_semaforo" or estado not in ("normal", "aviso", "critico"):
+            raise ValueError("El semáforo admite los estados normal, aviso y critico")
+        self.estado = estado
+
     def to_dict(self) -> dict:
-        """{"id", "nombre", "tipo", "encendido"}."""
-        return {
+        """Datos del actuador y, si se ha fijado, el estado del semáforo."""
+        datos = {
             "id": self.id,
             "nombre": self.nombre,
             "tipo": self.tipo,
             "encendido": self.encendido,
         }
+        if self.estado is not None:
+            datos["estado"] = self.estado
+        return datos
 
 
 def crear_actuador(datos: dict) -> Actuador:
@@ -35,4 +50,5 @@ def crear_actuador(datos: dict) -> Actuador:
         nombre=datos["nombre"],
         tipo=datos["tipo"],
         encendido=datos.get("encendido", False),
+        estado=datos.get("estado"),
     )
