@@ -6,9 +6,11 @@ pantalla: su inicio es el dashboard (OME-40).
 """
 import flet as ft
 
+from controller.dashboard_controller import DashboardController
 from controller.zonas_controller import ZonasController
 from model.usuario import Usuario
 from view import tema
+from view.alertas_view import AlertasView
 from view.zonas_view import resumen_zona
 
 NOMBRE_TIPO = {"carpa": "Carpa", "zona_tecnica": "Zona técnica", "exterior": "Exterior"}
@@ -16,16 +18,20 @@ NOMBRE_TIPO = {"carpa": "Carpa", "zona_tecnica": "Zona técnica", "exterior": "E
 
 class InicioView:
 
-    def __init__(self, usuario: Usuario, zonas: ZonasController) -> None:
+    def __init__(
+        self, usuario: Usuario, zonas: ZonasController,
+        dashboard: DashboardController | None = None,
+    ) -> None:
         self.usuario = usuario
         self.zonas = zonas
+        self.dashboard = dashboard
 
     def construir(self) -> ft.Control:
         mis_zonas = self.zonas.listar(self.usuario)
         tarjetas = [self._tarjeta(zona) for zona in mis_zonas]
         if not tarjetas:
             tarjetas = [ft.Text("Todavía no tienes zonas asignadas.", color=tema.TEXTO_SUAVE)]
-        return ft.Column(
+        contenido = ft.Column(
             [
                 ft.Text(f"Hola, {self.usuario.nombre}", size=30, weight=ft.FontWeight.BOLD,
                         color=tema.TEXTO, font_family=tema.FUENTE_TITULOS),
@@ -36,6 +42,41 @@ class InicioView:
             ],
             spacing=6,
         )
+        if self.dashboard is not None:
+            aviso = ft.Text(visible=False, color=tema.CRITICO, size=14)
+            alertas = AlertasView(self.usuario, self.dashboard)
+
+            def mostrar_error() -> None:
+                aviso.value = "No se pudieron actualizar las alertas. Vuelve a intentarlo."
+                aviso.visible = True
+
+            async def actualizar(_evento: ft.ControlEvent) -> None:
+                try:
+                    self.dashboard.actualizar()
+                    alertas.refrescar()
+                except OSError:
+                    mostrar_error()
+                else:
+                    aviso.visible = False
+                if contenido.page is not None:
+                    contenido.update()
+
+            try:
+                self.dashboard.inicializar()
+            except OSError:
+                mostrar_error()
+            contenido.controls.extend([
+                ft.Container(height=12),
+                ft.Row(
+                    [tema.boton_secundario(
+                        "Actualizar alertas", actualizar, icono=ft.Icons.REFRESH,
+                    )],
+                    wrap=True,
+                ),
+                aviso,
+                alertas.construir(),
+            ])
+        return contenido
 
     def _tarjeta(self, zona) -> ft.Control:
         return ft.Container(
