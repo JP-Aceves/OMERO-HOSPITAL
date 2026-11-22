@@ -14,9 +14,12 @@ from typing import Callable
 
 import flet as ft
 
+from controller.actuadores_controller import ActuadoresController
 from controller.navegacion import MENU_POR_ROL
-from model.usuario import Usuario
+from model.usuario import Administrador, Usuario
+from persistence.repositorio_zonas import RepositorioZonas
 from view import tema
+from view.actuadores_view import ActuadoresView
 
 NOMBRE_ROL = {
     "administrador": "Administrador",
@@ -127,8 +130,11 @@ class ShellView:
     # ---------- contenido ----------
 
     def _zona_contenido(self) -> ft.Control:
+        controles = [self.contenido]
+        if self.usuario.ROL == Administrador.ROL:
+            controles.append(ActuadoresView(self.usuario, ActuadoresController(RepositorioZonas())))
         return ft.Container(
-            content=ft.Column([self.contenido], scroll=ft.ScrollMode.AUTO, expand=True),
+            content=ft.Column(controles, scroll=ft.ScrollMode.AUTO, expand=True),
             expand=True,
             padding=32,
         )

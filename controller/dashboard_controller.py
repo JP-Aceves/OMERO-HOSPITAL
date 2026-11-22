@@ -1,8 +1,7 @@
 """Datos del dashboard del jefe de sanidad. Responsable: Medina (OME-40)."""
 from datetime import datetime
-from pathlib import Path
-from tempfile import NamedTemporaryFile
 
+from controller.actuadores_controller import ActuadoresController
 from model.lectura import Lectura
 from model.lista_enlazada import ListaEnlazada
 from model.usuario import Usuario
@@ -112,34 +111,24 @@ class DashboardController:
         # El simulador ya guarda la ronda y puede usar otro repositorio en memoria.
         self._ultima_ronda = self.simulador.generar_ronda()
         self._sincronizar_semaforos()
+        alertas = alertas_de_ronda(self.repo_zonas.listar(), self._ultima_ronda)
+        ActuadoresController(self.repo_zonas).aplicar_alertas(alertas)
 
     def _sincronizar_semaforos(self) -> None:
-        # Otro controlador puede haber cambiado umbrales o actuadores desde el login.
-        repositorio = RepositorioZonas(self.repo_zonas.ruta)
-        cambios = False
-        for resumen in self._resumen_zonas(repositorio.listar()):
-            zona = repositorio.buscar(resumen["id"])
-            for actuador in zona.actuadores:
-                if actuador.tipo == "led_semaforo":
-                    if actuador.estado != resumen["estado"] or not actuador.encendido:
+        def sincronizar(zonas: ListaEnlazada) -> bool:
+            cambios = False
+            for resumen in self._resumen_zonas(zonas):
+                zona = zonas.buscar(lambda dato: dato.id == resumen["id"])
+                for actuador in zona.actuadores:
+                    if actuador.tipo == "led_semaforo" and (
+                        actuador.estado != resumen["estado"] or not actuador.encendido
+                    ):
                         actuador.fijar_estado(resumen["estado"])
                         actuador.encender()
                         cambios = True
-        if cambios:
-            # Publica el JSON completo para poder reintentar si falla la escritura.
-            ruta = repositorio.ruta
-            with NamedTemporaryFile(
-                dir=ruta.parent, prefix=f".{ruta.name}-", suffix=".tmp", delete=False,
-            ) as temporal:
-                ruta_temporal = Path(temporal.name)
-            try:
-                repositorio.ruta = ruta_temporal
-                repositorio.guardar()
-                ruta_temporal.replace(ruta)
-            finally:
-                repositorio.ruta = ruta
-                ruta_temporal.unlink(missing_ok=True)
-        self.repo_zonas = repositorio
+            return cambios
+
+        self.repo_zonas.modificar_estados(sincronizar)
 
     def alertas(self, usuario: Usuario | None = None) -> list[dict]:
         """Alertas activas de la última ronda (OME-60, Medina). Usa service/alertas.py.

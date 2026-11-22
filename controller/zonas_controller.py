@@ -66,7 +66,7 @@ class ZonasController:
         zona.tipo = tipo
         zona.responsable = responsable
         try:
-            self.repo_zonas.actualizar(zona)
+            self.repo_zonas.actualizar(zona, conservar_estados=True)
         except ValueError:
             return "La zona no existe"
         return None
@@ -107,7 +107,7 @@ class ZonasController:
 
         try:
             zona.anadir_sensor(sensor)
-            self.repo_zonas.actualizar(zona)
+            self.repo_zonas.actualizar(zona, conservar_estados=True)
         except ValueError:
             return "No se pudo añadir el sensor porque su identificador ya existe"
         return None
@@ -137,7 +137,7 @@ class ZonasController:
         sensor.umbral_aviso = aviso
         sensor.umbral_critico = critico
         try:
-            self.repo_zonas.actualizar(zona)
+            self.repo_zonas.actualizar(zona, conservar_estados=True)
         except ValueError:
             return "La zona no existe"
         return None
@@ -149,7 +149,7 @@ class ZonasController:
         if not zona.eliminar_sensor(id_sensor):
             return "El sensor no existe en esa zona"
         try:
-            self.repo_zonas.actualizar(zona)
+            self.repo_zonas.actualizar(zona, conservar_estados=True)
         except ValueError:
             return "La zona no existe"
         return None
@@ -167,7 +167,7 @@ class ZonasController:
         actuador = Actuador(self.repo_zonas.siguiente_id("A"), nombre, tipo)
         try:
             zona.anadir_actuador(actuador)
-            self.repo_zonas.actualizar(zona)
+            self.repo_zonas.actualizar(zona, conservar_estados=True)
         except ValueError:
             return "No se pudo añadir el actuador porque su identificador ya existe"
         return None
@@ -179,7 +179,7 @@ class ZonasController:
         if not zona.eliminar_actuador(id_actuador):
             return "El actuador no existe en esa zona"
         try:
-            self.repo_zonas.actualizar(zona)
+            self.repo_zonas.actualizar(zona, conservar_estados=True)
         except ValueError:
             return "La zona no existe"
         return None
@@ -197,7 +197,7 @@ class ZonasController:
 
         zona.responsable = nombre_usuario
         try:
-            self.repo_zonas.actualizar(zona)
+            self.repo_zonas.actualizar(zona, conservar_estados=True)
         except ValueError:
             return "La zona no existe"
         return None

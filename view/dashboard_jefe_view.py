@@ -4,10 +4,12 @@ from datetime import datetime
 
 import flet as ft
 
+from controller.actuadores_controller import ActuadoresController
 from controller.dashboard_controller import DashboardController
 from model.usuario import Usuario
 from service.estado import AVISO, CRITICO, NORMAL
 from view import tema
+from view.actuadores_view import ActuadoresView
 from view.alertas_view import AlertasView
 
 
@@ -148,6 +150,7 @@ class DashboardJefeView:
         aviso = ft.Text(visible=False, color=tema.CRITICO, size=14)
         sin_zonas = ft.Text("Todavía no hay zonas configuradas.", color=tema.TEXTO_SUAVE)
         alertas = AlertasView(self.usuario, self.controlador)
+        actuadores = ActuadoresView(self.usuario, ActuadoresController(self.controlador.repo_zonas))
 
         def mostrar_resumen() -> None:
             zonas = self.controlador.resumen()
@@ -162,6 +165,7 @@ class DashboardJefeView:
             tarjetas.controls = [self._tarjeta(zona) for zona in zonas]
             sin_zonas.visible = not zonas
             alertas.refrescar()
+            actuadores.refrescar()
 
         def mostrar_error() -> None:
             aviso.value = "No se pudieron actualizar las lecturas. Vuelve a intentarlo."
@@ -202,6 +206,7 @@ class DashboardJefeView:
                 tarjetas,
                 sin_zonas,
                 alertas.construir(),
+                actuadores,
             ],
             spacing=14,
             horizontal_alignment=ft.CrossAxisAlignment.STRETCH,

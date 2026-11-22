@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+from pathlib import Path
 
 import pytest
 
@@ -259,14 +260,15 @@ def test_resumen_no_guarda_y_un_estado_igual_no_vuelve_a_guardar(
     zonas, lecturas = contexto_semaforos
     simulador = SimuladorDePrueba(lecturas, [(25, 80, 95), (26, 75, 90)])
     dashboard = DashboardController(zonas, lecturas, simulador)
-    guardar_original = RepositorioZonas.guardar
+    reemplazar_original = Path.replace
     guardados = []
 
-    def guardar(repo):
-        guardados.append(repo.ruta)
-        guardar_original(repo)
+    def reemplazar(temporal, destino):
+        if destino == zonas.ruta:
+            guardados.append(temporal)
+        return reemplazar_original(temporal, destino)
 
-    monkeypatch.setattr(RepositorioZonas, "guardar", guardar)
+    monkeypatch.setattr(Path, "replace", reemplazar)
 
     dashboard.resumen()
     assert guardados == []
@@ -292,18 +294,18 @@ def test_error_al_guardar_semaforos_no_deja_un_estado_falso_en_memoria_y_se_rein
     dashboard = DashboardController(
         zonas, lecturas, SimuladorDePrueba(lecturas, [(33, 80, 95)])
     )
-    guardar_original = RepositorioZonas.guardar
+    reemplazar_original = Path.replace
     original_json = zonas.ruta.read_bytes()
     fallar = True
 
-    def guardar(repo):
+    def reemplazar(temporal, destino):
         nonlocal fallar
-        if fallar:
+        if fallar and destino == zonas.ruta:
             fallar = False
             raise OSError("No se puede escribir el estado del semáforo")
-        guardar_original(repo)
+        return reemplazar_original(temporal, destino)
 
-    monkeypatch.setattr(RepositorioZonas, "guardar", guardar)
+    monkeypatch.setattr(Path, "replace", reemplazar)
 
     with pytest.raises(OSError):
         dashboard.actualizar()
@@ -353,19 +355,19 @@ def test_guardado_parcial_no_corrompe_json_limpia_temporal_y_permite_reintentar(
     zonas, lecturas = contexto_semaforos
     simulador = SimuladorDePrueba(lecturas, [(33, 80, 95)])
     dashboard = DashboardController(zonas, lecturas, simulador)
-    guardar_original = RepositorioZonas.guardar
+    volcar_original = json.dump
     original_json = zonas.ruta.read_bytes()
     fallar = True
 
-    def guardar_incompleto(repo):
+    def volcar_incompleto(datos, fichero, **opciones):
         nonlocal fallar
-        if fallar:
+        if fallar and Path(fichero.name).name.startswith(f".{zonas.ruta.name}-"):
             fallar = False
-            repo.ruta.write_text('[{"id": "Z1",', encoding="utf-8")
+            fichero.write('[{"id": "Z1",')
             raise OSError("La escritura se interrumpió a mitad del JSON")
-        guardar_original(repo)
+        volcar_original(datos, fichero, **opciones)
 
-    monkeypatch.setattr(RepositorioZonas, "guardar", guardar_incompleto)
+    monkeypatch.setattr(json, "dump", volcar_incompleto)
 
     with pytest.raises(OSError):
         dashboard.actualizar()

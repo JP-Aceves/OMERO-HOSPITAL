@@ -1,9 +1,15 @@
 """Lectura y escritura de zonas (con sus sensores y actuadores) en JSON. Responsable: Ivan (OME-34)."""
 import json
+from collections.abc import Callable
 from pathlib import Path
+from tempfile import NamedTemporaryFile
+from threading import RLock
 
 from model.lista_enlazada import ListaEnlazada
 from model.zona import Zona, crear_zona
+
+
+_bloqueo_zonas = RLock()
 
 
 class RepositorioZonas:
@@ -15,10 +21,11 @@ class RepositorioZonas:
     def cargar(self) -> ListaEnlazada:
         """Lee el JSON y devuelve una ListaEnlazada de Zona. Vacía si el fichero no existe."""
         zonas = ListaEnlazada()
-        if self.ruta.exists():
-            with self.ruta.open(encoding="utf-8") as fichero:
-                for datos in json.load(fichero):
-                    zonas.insertar(crear_zona(datos))
+        with _bloqueo_zonas:
+            if self.ruta.exists():
+                with self.ruta.open(encoding="utf-8") as fichero:
+                    for datos in json.load(fichero):
+                        zonas.insertar(crear_zona(datos))
         return zonas
 
     def recargar(self) -> None:
@@ -32,12 +39,31 @@ class RepositorioZonas:
 
     def guardar(self) -> None:
         """Escribe todas las zonas en el JSON."""
+        with _bloqueo_zonas:
+            self._guardar_zonas(self._zonas)
+
+    def _guardar_zonas(self, zonas: ListaEnlazada) -> None:
         self.ruta.parent.mkdir(parents=True, exist_ok=True)
-        # json solo sabe escribir un array a partir de una list: la creamos
-        # aquí, justo al escribir, y no la usamos para guardar datos.
-        datos = [zona.to_dict() for zona in self._zonas]
-        with self.ruta.open("w", encoding="utf-8") as fichero:
-            json.dump(datos, fichero, ensure_ascii=False, indent=2)
+        datos = [zona.to_dict() for zona in zonas]
+        fichero = NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=self.ruta.parent,
+            prefix=f".{self.ruta.name}-", suffix=".tmp", delete=False,
+        )
+        temporal = Path(fichero.name)
+        try:
+            with fichero:
+                json.dump(datos, fichero, ensure_ascii=False, indent=2)
+            temporal.replace(self.ruta)
+        finally:
+            temporal.unlink(missing_ok=True)
+
+    def modificar_estados(self, cambiar: Callable[[ListaEnlazada], bool]) -> None:
+        """Aplica cambios de actuadores sobre la copia vigente y guarda si hubo cambios."""
+        with _bloqueo_zonas:
+            zonas = self.cargar()
+            if cambiar(zonas):
+                self._guardar_zonas(zonas)
+            self._zonas = zonas
 
     def listar(self) -> ListaEnlazada:
         """Todas las zonas, en el orden del fichero."""
@@ -49,27 +75,45 @@ class RepositorioZonas:
 
     def anadir(self, zona: Zona) -> None:
         """Guarda una zona nueva. ValueError si el id ya existe."""
-        if self.buscar(zona.id) is not None:
-            raise ValueError(f"Ya existe una zona con el id {zona.id}")
-        self._zonas.insertar(zona)
-        self.guardar()
+        with _bloqueo_zonas:
+            zonas = self.cargar()
+            if zonas.buscar(lambda existente: existente.id == zona.id) is not None:
+                raise ValueError(f"Ya existe una zona con el id {zona.id}")
+            zonas.insertar(zona)
+            self._guardar_zonas(zonas)
+            self._zonas = zonas
 
-    def actualizar(self, zona: Zona) -> None:
-        """Sustituye la zona con ese id y guarda. ValueError si no existe."""
-        if self.buscar(zona.id) is None:
-            raise ValueError(f"No existe ninguna zona con el id {zona.id}")
-        nuevas = ListaEnlazada()
-        for existente in self._zonas:
-            nuevas.insertar(zona if existente.id == zona.id else existente)
-        self._zonas = nuevas
-        self.guardar()
+    def actualizar(self, zona: Zona, *, conservar_estados: bool = False) -> None:
+        """Sustituye la zona con ese id. El editor conserva los estados vigentes."""
+        with _bloqueo_zonas:
+            zonas = self.cargar()
+            anterior = zonas.buscar(lambda existente: existente.id == zona.id)
+            if anterior is None:
+                raise ValueError(f"No existe ninguna zona con el id {zona.id}")
+            if conservar_estados:
+                for actuador in zona.actuadores:
+                    vigente = anterior.actuadores.buscar(
+                        lambda dato: dato.id == actuador.id and dato.tipo == actuador.tipo
+                    )
+                    if vigente is not None:
+                        actuador.encendido = vigente.encendido
+                        if vigente.estado is not None:
+                            actuador.fijar_estado(vigente.estado)
+            nuevas = ListaEnlazada()
+            for existente in zonas:
+                nuevas.insertar(zona if existente.id == zona.id else existente)
+            self._guardar_zonas(nuevas)
+            self._zonas = nuevas
 
     def eliminar(self, id_zona: str) -> bool:
         """Borra la zona con ese id y guarda. False si no existía."""
-        eliminada = self._zonas.eliminar(lambda zona: zona.id == id_zona)
-        if eliminada:
-            self.guardar()
-        return eliminada
+        with _bloqueo_zonas:
+            zonas = self.cargar()
+            eliminada = zonas.eliminar(lambda zona: zona.id == id_zona)
+            if eliminada:
+                self._guardar_zonas(zonas)
+            self._zonas = zonas
+            return eliminada
 
     def zonas_de(self, usuario: str) -> ListaEnlazada:
         """Zonas cuyo responsable es ese nombre de usuario."""
