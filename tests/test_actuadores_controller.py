@@ -224,6 +224,9 @@ def _fila(vista, nombre):
 
 def test_desde_los_dashboards_ventilador_y_evacuacion(zonas, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
+    zona_carpa = zonas.buscar("Z1")
+    zona_carpa.anadir_sensor(SensorTemperatura("S1", "Temperatura de la carpa", 28, 32))
+    zonas.actualizar(zona_carpa)
     cuentas = RepositorioJSON()
     clave = "prueba-ome-66"
     for rol, nombre in (
@@ -233,17 +236,35 @@ def test_desde_los_dashboards_ventilador_y_evacuacion(zonas, tmp_path, monkeypat
         sal, codigo = hashear(clave)
         cuentas.anadir(rol(nombre, nombre, codigo, sal))
 
-    carpa = _entrar("carpa", clave)
-    ventilador = _fila(carpa, "Carpa · Ventilador")
-    assert ventilador.controls[0].value.endswith("Apagado")
-    asyncio.run(ventilador.controls[1].on_click(None))
-
     critico = False
+    temperatura = 33
 
     def valor(_simulador, sensor):
+        if sensor.id == "S1":
+            return temperatura
         return 50 if critico and sensor.id == "HZ2" else 10
 
     monkeypatch.setattr(Simulador, "_siguiente_valor", valor)
+    carpa = _entrar("carpa", clave)
+    textos = {c.value for c in _recorrer(carpa) if isinstance(getattr(c, "value", None), str)}
+    assert {"Mi carpa", "33 °C", "1 activa", "Ventilador · Apagado"} <= textos
+    assert "Z2" not in textos
+
+    temperatura = 25
+    actualizar_carpa = next(c for c in _recorrer(carpa) if getattr(c, "text", None) == "Actualizar")
+    asyncio.run(actualizar_carpa.on_click(None))
+    textos = {c.value for c in _recorrer(carpa) if isinstance(getattr(c, "value", None), str)}
+    assert {"25 °C", "0 activas"} <= textos
+    assert "33 °C" not in textos
+
+    encender = next(
+        c for c in _recorrer(carpa) if getattr(c, "text", None) == "Encender ventilador"
+    )
+    asyncio.run(encender.on_click(None))
+    assert any(
+        getattr(c, "text", None) == "Apagar ventilador" for c in _recorrer(carpa)
+    )
+
     jefe = _entrar("jefe", clave)
     ventilador = _fila(jefe, "Carpa · Ventilador")
     assert ventilador.controls[0].value.endswith("Encendido")
