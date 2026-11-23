@@ -48,10 +48,19 @@ def usuario():
 @pytest.fixture
 def dashboard():
     controlador = Mock()
+    controlador.repo_zonas.cargar.return_value = ListaEnlazada()
     controlador.alertas.return_value = [_alerta()]
     controlador.resumen.return_value = []
     controlador.contadores.return_value = {NORMAL: 0, AVISO: 0, CRITICO: 0}
     controlador.ultima_actualizacion = None
+    return controlador
+
+
+@pytest.fixture
+def zonas():
+    controlador = Mock()
+    controlador.listar.return_value = ListaEnlazada()
+    controlador.repo_zonas.cargar.return_value = ListaEnlazada()
     return controlador
 
 
@@ -114,19 +123,14 @@ def test_error_al_cargar_no_muestra_un_falso_estado_sin_alertas(usuario, dashboa
     )
 
 
-def test_inicio_conserva_el_constructor_sin_dashboard(usuario):
-    zonas = Mock()
-    zonas.listar.return_value = ListaEnlazada()
-
+def test_inicio_conserva_el_constructor_sin_dashboard(usuario, zonas):
     contenido = InicioView(usuario, zonas).construir()
 
     assert "Todavía no tienes zonas asignadas." in _textos(contenido)
     assert "Alertas activas" not in _textos(contenido)
 
 
-def test_inicio_inicializa_antes_de_leer_las_alertas(usuario, dashboard):
-    zonas = Mock()
-    zonas.listar.return_value = ListaEnlazada()
+def test_inicio_inicializa_antes_de_leer_las_alertas(usuario, dashboard, zonas):
     dashboard.alertas.return_value = []
     dashboard.inicializar.side_effect = lambda: setattr(dashboard.alertas, "return_value", [_alerta()])
 
@@ -136,9 +140,7 @@ def test_inicio_inicializa_antes_de_leer_las_alertas(usuario, dashboard):
     assert "Temperatura" in _textos(contenido)
 
 
-def test_actualizar_alertas_refresca_el_panel(usuario, dashboard):
-    zonas = Mock()
-    zonas.listar.return_value = ListaEnlazada()
+def test_actualizar_alertas_refresca_el_panel(usuario, dashboard, zonas):
     contenido = InicioView(usuario, zonas, dashboard).construir()
     dashboard.actualizar.side_effect = lambda: setattr(
         dashboard.alertas, "return_value", [_alerta(sensor="Humo", valor=80)]
@@ -152,9 +154,7 @@ def test_actualizar_alertas_refresca_el_panel(usuario, dashboard):
     dashboard.alertas.assert_called_with(usuario)
 
 
-def test_error_de_actualizacion_conserva_las_alertas_y_permite_reintentar(usuario, dashboard):
-    zonas = Mock()
-    zonas.listar.return_value = ListaEnlazada()
+def test_error_de_actualizacion_conserva_las_alertas_y_permite_reintentar(usuario, dashboard, zonas):
     contenido = InicioView(usuario, zonas, dashboard).construir()
     dashboard.actualizar.side_effect = OSError("Sin acceso al fichero")
 
@@ -176,9 +176,7 @@ def test_error_de_actualizacion_conserva_las_alertas_y_permite_reintentar(usuari
     assert "Temperatura" not in _textos(contenido)
 
 
-def test_error_de_inicializacion_conserva_las_alertas_cargadas(usuario, dashboard):
-    zonas = Mock()
-    zonas.listar.return_value = ListaEnlazada()
+def test_error_de_inicializacion_conserva_las_alertas_cargadas(usuario, dashboard, zonas):
     dashboard.inicializar.side_effect = OSError("No se puede escribir")
 
     contenido = InicioView(usuario, zonas, dashboard).construir()
@@ -191,9 +189,7 @@ def test_error_de_inicializacion_conserva_las_alertas_cargadas(usuario, dashboar
     )
 
 
-def test_error_de_lectura_tras_actualizar_conserva_la_lista_previa(usuario, dashboard):
-    zonas = Mock()
-    zonas.listar.return_value = ListaEnlazada()
+def test_error_de_lectura_tras_actualizar_conserva_la_lista_previa(usuario, dashboard, zonas):
     contenido = InicioView(usuario, zonas, dashboard).construir()
     dashboard.alertas.side_effect = OSError("No se puede leer")
 

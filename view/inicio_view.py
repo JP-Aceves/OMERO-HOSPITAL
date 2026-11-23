@@ -6,10 +6,12 @@ pantalla: su inicio es el dashboard (OME-40).
 """
 import flet as ft
 
+from controller.actuadores_controller import ActuadoresController
 from controller.dashboard_controller import DashboardController
 from controller.zonas_controller import ZonasController
 from model.usuario import Usuario
 from view import tema
+from view.actuadores_view import ActuadoresView
 from view.alertas_view import AlertasView
 from view.zonas_view import resumen_zona
 
@@ -42,6 +44,7 @@ class InicioView:
             ],
             spacing=6,
         )
+        actuadores = ActuadoresView(self.usuario, ActuadoresController(self.zonas.repo_zonas))
         if self.dashboard is not None:
             aviso = ft.Text(visible=False, color=tema.CRITICO, size=14)
             alertas = AlertasView(self.usuario, self.dashboard)
@@ -54,6 +57,7 @@ class InicioView:
                 try:
                     self.dashboard.actualizar()
                     alertas.refrescar()
+                    actuadores.refrescar()
                 except OSError:
                     mostrar_error()
                 else:
@@ -65,6 +69,7 @@ class InicioView:
                 self.dashboard.inicializar()
             except OSError:
                 mostrar_error()
+            actuadores.refrescar()
             contenido.controls.extend([
                 ft.Container(height=12),
                 ft.Row(
@@ -76,6 +81,7 @@ class InicioView:
                 aviso,
                 alertas.construir(),
             ])
+        contenido.controls.append(actuadores)
         return contenido
 
     def _tarjeta(self, zona) -> ft.Control:
