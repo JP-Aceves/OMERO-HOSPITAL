@@ -1,4 +1,4 @@
 Nombre: Ivan Sanz
 Rol: Equipo de desarrollo
-Tareas: OME-65 · Predicción del vaciado del depósito con regresión lineal
+Tareas: OME-65 · Predicción del vaciado del depósito con regresión lineal, OME-63 · Dashboard del técnico de logística
 Sprint: 3
