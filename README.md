@@ -150,6 +150,7 @@ a = (Σy − b · Σt) / n                            nivel que marca la recta e
 ```
 
 El depósito llega a 0 % cuando `a + b · t = 0`, es decir, a los `t = −a / b` minutos de la primera lectura. Ejemplo: 100, 98, 96, 94 y 92 % cada 10 minutos dan `a = 100` y `b = −0,2`, así que se vacía a los 500 minutos. Solo se usan las lecturas desde el último rellenado (una subida de más de 10 puntos entre dos lecturas seguidas): con el histórico entero la gráfica es un diente de sierra y la pendiente sale mucho más pequeña de lo real (con 200 rondas y `--semilla 1`, 0,034 % por minuto con todo el histórico frente a 0,251 % por minuto en el último tramo). Devuelve `None` si en ese tramo hay menos de 5 lecturas o si el nivel no baja (`b ≥ 0`).
+
 ## Umbrales (fuente: tabla "Umbrales iniciales por sensor" del documento del proyecto)
 
 | `tipo` | Sensor | Unidad | Aviso | Crítico | Malo si | Rango simulado |
