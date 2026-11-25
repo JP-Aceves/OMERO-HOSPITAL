@@ -2,6 +2,7 @@ def test_los_modulos_se_importan():
     import controller.actuadores_controller
     import controller.carpa_controller
     import controller.dashboard_controller
+    import controller.historico_controller
     import controller.login_controller
     import controller.navegacion
     import controller.registro_controller
@@ -25,6 +26,7 @@ def test_los_modulos_se_importan():
     import view.dashboard_carpa_view
     import view.dashboard_jefe_view
     import view.dashboard_tecnico_view
+    import view.historico_view
     import view.inicio_view
     import view.login_view
     import view.pendiente_view

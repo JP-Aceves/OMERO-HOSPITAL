@@ -2,15 +2,17 @@
 
 El "/inicio" de cada rol es su dashboard: jefe (OME-40), responsable de carpa
 (OME-62) y técnico de logística (OME-63). Una cuenta pendiente (OME-61) solo
-ve "/pendiente" hasta que el administrador le asigna un rol.
+ve "/pendiente" hasta que el administrador le asigna un rol. "/historico"
+(OME-70) lo ven los tres roles operativos, cada uno con sus zonas.
 MENU_POR_ROL es configuración fija, no datos de la app: por eso puede ser dict y list.
 """
 
 MENU_POR_ROL: dict[str, list[tuple[str, str]]] = {
     "administrador": [("Usuarios", "/usuarios")],
-    "jefe_sanidad": [("Estado global", "/inicio"), ("Zonas y sensores", "/zonas")],
-    "responsable_carpa": [("Mi carpa", "/inicio")],
-    "tecnico_logistica": [("Recursos", "/inicio")],
+    "jefe_sanidad": [("Estado global", "/inicio"), ("Zonas y sensores", "/zonas"),
+                     ("Histórico", "/historico")],
+    "responsable_carpa": [("Mi carpa", "/inicio"), ("Histórico", "/historico")],
+    "tecnico_logistica": [("Recursos", "/inicio"), ("Histórico", "/historico")],
     "pendiente": [("Cuenta pendiente", "/pendiente")],
 }
 

@@ -10,6 +10,7 @@ from controller import navegacion
 from controller.actuadores_controller import ActuadoresController
 from controller.carpa_controller import CarpaController
 from controller.dashboard_controller import DashboardController
+from controller.historico_controller import HistoricoController
 from controller.login_controller import LoginController
 from controller.registro_controller import RegistroController
 from controller.tecnico_controller import TecnicoController
@@ -23,6 +24,7 @@ from view import tema
 from view.dashboard_carpa_view import DashboardCarpaView
 from view.dashboard_jefe_view import DashboardJefeView
 from view.dashboard_tecnico_view import DashboardTecnicoView
+from view.historico_view import HistoricoView
 from view.inicio_view import InicioView
 from view.login_view import LoginView
 from view.pendiente_view import PendienteView
@@ -97,11 +99,15 @@ def main(page: ft.Page) -> None:
     def contenido_usuarios(usuario):
         return UsuariosView(usuario, UsuariosController(repositorio)).construir()
 
+    def contenido_historico(usuario):
+        return HistoricoView(usuario, HistoricoController(RepositorioZonas(), RepositorioLecturas())).construir()
+
     PANTALLAS = {
         "/inicio": (contenido_inicio, "OME-40"),
         "/zonas": (contenido_zonas, "OME-35"),
         "/usuarios": (contenido_usuarios, "OME-57"),
         "/pendiente": (contenido_pendiente, "OME-61"),
+        "/historico": (contenido_historico, "OME-70"),
     }
 
     def construir_contenido(ruta, usuario):
