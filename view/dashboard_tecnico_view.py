@@ -30,9 +30,21 @@ def minutos_entre(desde: str, hasta: str) -> float:
 
 
 def tiempo_restante(minutos: float) -> str:
-    """545 -> "9 h 5 min"; 35 -> "35 min"."""
+    """545 -> "9 h 5 min"; 35 -> "35 min"; 8318 -> "5 d 18 h"."""
     horas, resto = divmod(max(0, round(minutos)), 60)
+    if horas >= 24:
+        return f"{horas // 24} d {horas % 24} h"
     return f"{horas} h {resto} min" if horas else f"{resto} min"
+
+
+def momento_actualizacion(momento: datetime | None, hoy: datetime | None = None) -> str:
+    """" · actualizado a las 19:09", con la fecha si las lecturas no son de hoy."""
+    if momento is None:
+        return " · sin lecturas todavía"
+    hoy = hoy or datetime.now()
+    if momento.date() == hoy.date():
+        return f" · actualizado a las {momento:%H:%M}"
+    return f" · actualizado el {momento:%d/%m} a las {momento:%H:%M}"
 
 
 def tarjeta(titulo: str, chip: ft.Control | None, cuerpo: list[ft.Control], col: dict) -> ft.Container:
@@ -80,8 +92,7 @@ class DashboardTecnicoView:
             sin_zonas.visible = not zonas
             boton_actualizar.disabled = not zonas
             nombres = " y ".join(zona["nombre"] for zona in zonas)
-            momento = self.controlador.dashboard.ultima_actualizacion
-            subtitulo.value = nombres + (f" · actualizado a las {momento:%H:%M}" if momento else "")
+            subtitulo.value = nombres + momento_actualizacion(self.controlador.dashboard.ultima_actualizacion)
 
             criticos = [
                 sensor["nombre"] for zona in zonas for sensor in zona["sensores"]
@@ -341,5 +352,9 @@ class DashboardTecnicoView:
         )
         return ft.Container(
             bgcolor=tema.TARJETA, border=ft.border.all(1, tema.BORDE), border_radius=12, padding=20,
-            content=ft.Column([titulo, leyenda, grafica], spacing=10, key="tecnico_grafica"),
+            content=ft.Column(
+                # Margen a la derecha para que no se corte la fecha de la última etiqueta del eje.
+                [titulo, leyenda, ft.Container(grafica, padding=ft.padding.only(right=44))],
+                spacing=10, key="tecnico_grafica",
+            ),
         )

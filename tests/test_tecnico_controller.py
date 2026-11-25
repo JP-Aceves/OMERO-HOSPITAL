@@ -28,6 +28,11 @@ def contexto(tmp_path, monkeypatch):
     copyfile(origen, ruta_zonas)
     ruta_lecturas = tmp_path / "lecturas.json"
     zonas = RepositorioZonas(ruta_zonas)
+    # Todos los actuadores empiezan apagados, aunque data/zonas.json haya cambiado al usar la app.
+    for zona in zonas.listar():
+        for actuador in zona.actuadores:
+            actuador.apagar()
+    zonas.guardar()
     simulador = Simulador(zonas, RepositorioLecturas(ruta_lecturas), semilla=7)
     valores = dict(NORMALES)
     niveles = []  # si tiene valores, el depósito los va dando en orden

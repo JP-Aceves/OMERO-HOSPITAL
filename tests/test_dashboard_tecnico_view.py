@@ -1,5 +1,6 @@
 """Pruebas de la pantalla "Recursos y riesgos" del técnico de logística (OME-63)."""
 import asyncio
+from datetime import datetime
 from pathlib import Path
 from shutil import copyfile
 
@@ -13,7 +14,7 @@ from model.usuario import TecnicoLogistica
 from persistence.repositorio_lecturas import RepositorioLecturas
 from persistence.repositorio_zonas import RepositorioZonas
 from service.simulador import Simulador
-from view.dashboard_tecnico_view import DashboardTecnicoView, numero, tiempo_restante
+from view.dashboard_tecnico_view import DashboardTecnicoView, momento_actualizacion, numero, tiempo_restante
 
 NORMALES = {
     "temperatura": 25, "humedad": 50, "calidad_aire": 10, "luz": 60,
@@ -49,6 +50,11 @@ def contexto(tmp_path, monkeypatch):
     copyfile(origen, ruta_zonas)
     ruta_lecturas = tmp_path / "lecturas.json"
     zonas = RepositorioZonas(ruta_zonas)
+    # Todos los actuadores empiezan apagados, aunque data/zonas.json haya cambiado al usar la app.
+    for zona in zonas.listar():
+        for actuador in zona.actuadores:
+            actuador.apagar()
+    zonas.guardar()
     simulador = Simulador(zonas, RepositorioLecturas(ruta_lecturas), semilla=7)
     valores = dict(NORMALES)
     niveles = []
@@ -74,6 +80,14 @@ def _vista(controlador, usuario="logistica"):
 def test_formatos():
     assert numero(31.4) == "31,4" and numero(40.0) == "40" and numero(-15.1612) == "-15,2"
     assert tiempo_restante(545) == "9 h 5 min" and tiempo_restante(35) == "35 min"
+    assert tiempo_restante(8318) == "5 d 18 h"
+
+
+def test_la_hora_de_actualizacion_lleva_fecha_si_no_es_de_hoy():
+    hoy = datetime(2026, 11, 25, 19, 10)
+    assert momento_actualizacion(datetime(2026, 11, 25, 19, 9), hoy) == " · actualizado a las 19:09"
+    assert momento_actualizacion(datetime(2026, 11, 20, 19, 9), hoy) == " · actualizado el 20/11 a las 19:09"
+    assert momento_actualizacion(None, hoy) == " · sin lecturas todavía"
 
 
 def test_muestra_deposito_humo_viento_y_la_grafica_con_la_prediccion(contexto):
