@@ -33,7 +33,7 @@ class RegistroController:
         return None
 
     def registrar_pendiente(self, nombre: str, usuario: str, contrasena: str, repetir: str) -> str | None:
-        """"Registrar cuenta pendiente"""
+        """"Registra una cuenta pendiente"""
 
         if any(not campo.strip() for campo in (nombre, usuario, contrasena, repetir)):
             return "Rellena todos los campos"
@@ -52,7 +52,7 @@ class RegistroController:
         })
 
         try:
-            self.repositorio.añadir(nuevo_usuario)
+            self.repositorio.anadir(nuevo_usuario)
         except ValueError:
             return "Ese usuario ya existe"
 

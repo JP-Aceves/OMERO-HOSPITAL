@@ -29,7 +29,7 @@ def formulario():
     return vista, campos, registrar, volver
 
 
-def test_formulario_incluye_roles_y_oculta_las_contrasenas(formulario):
+def test_formulario_oculta_las_contrasenas(formulario):
     vista, campos, _, _ = formulario
 
     assert vista.route == "/registro"
@@ -38,30 +38,22 @@ def test_formulario_incluye_roles_y_oculta_las_contrasenas(formulario):
     for clave in ("contrasena", "repetir"):
         assert campos[f"registro_{clave}"].password is True
         assert campos[f"registro_{clave}"].can_reveal_password is True
-    assert {opcion.key for opcion in campos["registro_rol"].options} == {
-        "jefe_sanidad", "responsable_carpa", "tecnico_logistica"
-    }
     assert campos["registro_error"].visible is False
 
 
-@pytest.mark.parametrize(
-    "rol", ["jefe_sanidad", "responsable_carpa", "tecnico_logistica"]
-)
-def test_enviar_delega_los_datos_y_la_navegacion(formulario, monkeypatch, rol):
+
+def test_enviar_delega_los_datos_y_la_navegacion(formulario, monkeypatch):
     _, campos, registrar, volver = formulario
-    valores = ("María López", "maria", " clave ", " clave ", rol)
+    valores = ("María López", "maria", " clave ", " clave ")
     for clave, valor in zip(
-        ("nombre", "usuario", "contrasena", "repetir", "rol"), valores
+        ("nombre", "usuario", "contrasena", "repetir"), valores
     ):
         campos[f"registro_{clave}"].value = valor
-    actualizar = Mock()
-    monkeypatch.setattr(campos["registro_error"], "update", actualizar)
 
     campos["registro_enviar"].on_click(None)
 
     registrar.assert_called_once_with(*valores)
     volver.assert_not_called()
-    actualizar.assert_not_called()
 
 
 def test_campos_sin_valor_se_envian_como_cadenas_vacias(formulario):
@@ -69,7 +61,7 @@ def test_campos_sin_valor_se_envian_como_cadenas_vacias(formulario):
 
     campos["registro_enviar"].on_click(None)
 
-    registrar.assert_called_once_with("", "", "", "", "")
+    registrar.assert_called_once_with("", "", "", "")
 
 
 def test_error_del_controlador_se_muestra_en_la_vista(formulario, monkeypatch):
@@ -100,4 +92,4 @@ def test_enter_en_repetir_contrasena_envia_el_formulario(formulario):
 
     campos["registro_repetir"].on_submit(None)
 
-    registrar.assert_called_once_with("", "", "", "", "")
+    registrar.assert_called_once_with("", "", "", "")

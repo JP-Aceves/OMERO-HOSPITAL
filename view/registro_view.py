@@ -9,8 +9,8 @@ from view import tema
 class RegistroView:
     RUTA = "/registro"
 
-    def __init__(self, al_registrar: Callable[[str, str, str, str, str], str | None], al_volver: Callable[[], None]) -> None:
-        """al_registrar(nombre, usuario, contrasena, repetir, rol) devuelve None si va bien, o el error."""
+    def __init__(self, al_registrar: Callable[[str, str, str, str], str | None], al_volver: Callable[[], None]) -> None:
+        """al_registrar(nombre, usuario, contrasena, repetir) devuelve None si va bien, o el error."""
         self.al_registrar = al_registrar
         self.al_volver = al_volver
 
@@ -42,23 +42,17 @@ class RegistroView:
             can_reveal_password=True, autocorrect=False, enable_suggestions=False,
             col={"xs": 12, "sm": 6}, **estilo_campo,
         )
-        rol = ft.Dropdown(
-            key="test:registro_rol", label="Rol", hint_text="Selecciona tu rol", expand=True,
-            options=[
-                ft.dropdown.Option("jefe_sanidad", "Jefe de sanidad"),
-                ft.dropdown.Option("responsable_carpa", "Responsable de carpa"),
-                ft.dropdown.Option("tecnico_logistica", "Técnico de logística"),
-            ],
-            **estilo_campo,
-        )
+
         mensaje_error = ft.Text(
             "", key="test:registro_error", color=tema.CRITICO, size=13, visible=False
         )
 
         def registrar(_):
             error = self.al_registrar(
-                nombre.value or "", usuario.value or "", contrasena.value or "",
-                repetir.value or "", rol.value or "",
+                nombre.value or "",
+                usuario.value or "",
+                contrasena.value or "",
+                repetir.value or "",
             )
             if error is not None:
                 mensaje_error.value = error
@@ -122,7 +116,6 @@ class RegistroView:
                     ft.ResponsiveRow(
                         [contrasena, repetir], spacing=12, run_spacing=16
                     ),
-                    rol,
                     ft.Text(
                         "Todos los campos son obligatorios.", size=12, color=tema.TEXTO_SUAVE
                     ),
