@@ -38,9 +38,9 @@ class DashboardCarpaView:
             else:
                 panel_alertas.controls.append(alertas.construir())
 
-        async def actualizar(_evento: ft.ControlEvent) -> None:
+        def refrescar() -> None:
+            """OME-71: main.py la llama tras cada ronda de lecturas automática."""
             try:
-                self.controlador.actualizar()
                 mostrar_carpas()
                 mostrar_alertas()
             except (OSError, ValueError):
@@ -49,6 +49,18 @@ class DashboardCarpaView:
                 mostrar_error(None)
             if contenido.page is not None:
                 contenido.update()
+
+        async def actualizar(_evento: ft.ControlEvent) -> None:
+            try:
+                self.controlador.actualizar()
+            except (OSError, ValueError):
+                mostrar_error("No se pudieron actualizar las lecturas. Vuelve a intentarlo.")
+                if contenido.page is not None:
+                    contenido.update()
+                return
+            refrescar()
+
+        self.refrescar = refrescar
 
         def tarjeta_carpa(zona: dict) -> ft.Control:
             sensores = [self._sensor(sensor) for sensor in zona["sensores"]]

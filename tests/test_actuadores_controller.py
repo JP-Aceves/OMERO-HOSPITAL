@@ -194,6 +194,9 @@ class _PaginaDePrueba:
     def update(self):
         pass
 
+    def run_task(self, *_args):
+        pass  # OME-71: las lecturas en directo no se arrancan en las pruebas
+
 
 def _recorrer(control):
     yield control
@@ -278,13 +281,15 @@ def test_desde_los_dashboards_ventilador_y_evacuacion(zonas, tmp_path, monkeypat
     assert len(_fila(jefe, "Z2 · LED").controls) == 1
     assert _fila(jefe, "Z3 · LED").controls[0].value.endswith("Apagado")
 
+    # Desde OME-63 el técnico entra en "Recursos y riesgos": el LED de cada zona
+    # se controla con el botón de evacuación de su tarjeta de humo.
     tecnico = _entrar("logistica", clave)
-    asyncio.run(_fila(tecnico, "Z2 · LED").controls[1].on_click(None))
-    assert _fila(tecnico, "Z2 · LED").controls[0].value.endswith("Apagado")
-    actualizar = next(
-        c for c in _recorrer(tecnico) if getattr(c, "text", None) == "Actualizar alertas"
+    desactivar = next(
+        c for c in _recorrer(tecnico) if getattr(c, "text", None) == "Desactivar evacuación"
     )
+    asyncio.run(desactivar.on_click(None))
+    assert estado(zonas, "Z2", "A3") is False
+    actualizar = next(c for c in _recorrer(tecnico) if getattr(c, "text", None) == "Actualizar")
     asyncio.run(actualizar.on_click(None))
-    assert _fila(tecnico, "Z2 · LED").controls[0].value.endswith("Encendido")
-    admin = _entrar("admin", clave)
-    assert _fila(admin, "Carpa · Ventilador").controls[0].value.endswith("Encendido")
+    assert estado(zonas, "Z2", "A3") is True
+    assert estado(zonas, "Z3", "A4") is False

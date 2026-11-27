@@ -171,16 +171,30 @@ class DashboardJefeView:
             aviso.value = "No se pudieron actualizar las lecturas. Vuelve a intentarlo."
             aviso.visible = True
 
-        async def actualizar(_evento: ft.ControlEvent) -> None:
+        def pintar() -> None:
+            if contenido.page is not None:
+                contenido.update()
+
+        def refrescar() -> None:
+            """OME-71: main.py la llama tras cada ronda de lecturas automática."""
             try:
-                self.controlador.actualizar()
                 mostrar_resumen()
             except OSError:
                 mostrar_error()
             else:
                 aviso.visible = False
-            if contenido.page is not None:
-                contenido.update()
+            pintar()
+
+        async def actualizar(_evento: ft.ControlEvent) -> None:
+            try:
+                self.controlador.actualizar()
+            except OSError:
+                mostrar_error()
+                pintar()
+                return
+            refrescar()
+
+        self.refrescar = refrescar
 
         cabecera = ft.Column(
             [

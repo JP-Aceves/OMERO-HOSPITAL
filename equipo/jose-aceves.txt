@@ -1,4 +1,4 @@
 Nombre: Jose Aceves
 Rol: Equipo de desarrollo
-Tareas: OME-59 · Contratos del Sprint 3, OME-64 · Umbrales que se aplican en la siguiente lectura, OME-70 · Histórico y gráficas
+Tareas: OME-59 · Contratos del Sprint 3, OME-64 · Umbrales que se aplican en la siguiente lectura, OME-70 · Histórico y gráficas, OME-71 · Lecturas en directo y correcciones del histórico
 Sprint: 3

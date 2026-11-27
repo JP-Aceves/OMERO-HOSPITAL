@@ -3,7 +3,13 @@
 Solo JP modifica este archivo (OME-25). Aquí no hay lógica: crea los
 controladores, decide qué pantalla toca según la ruta y mete cada pantalla
 dentro del panel lateral (ShellView).
+
+OME-71: los sensores se leen solos cada INTERVALO_LECTURAS segundos mientras hay
+una sesión de jefe, carpa o técnico, y la pantalla abierta se refresca sola.
 """
+import asyncio
+import traceback
+
 import flet as ft
 
 from controller import navegacion
@@ -35,6 +41,8 @@ from view.usuarios_view import UsuariosView
 from view.zonas_view import ZonasView
 
 ANCHO_COMPACTO = 900  # por debajo, el panel lateral solo enseña iconos
+INTERVALO_LECTURAS = 5  # segundos entre una ronda de lecturas y la siguiente (OME-71)
+ROLES_CON_LECTURAS = ("jefe_sanidad", "responsable_carpa", "tecnico_logistica")
 
 
 def pendiente(tarea: str) -> ft.Control:
@@ -60,34 +68,44 @@ def main(page: ft.Page) -> None:
     page.window.min_width = 700
     page.window.min_height = 500
     registrar_fuentes(page)  # Clash Display (OME-36)
+    # Calendario del histórico en español (OME-71)
+    espanol = ft.Locale("es", "ES")
+    page.locale_configuration = ft.LocaleConfiguration(supported_locales=[espanol], current_locale=espanol)
 
     repositorio = RepositorioJSON()
     login = LoginController(repositorio)
     registro = RegistroController(repositorio)
-    sesion = {"usuario": None, "compacto": False}
+    # "vista": la pantalla abierta, para refrescarla cuando llegan lecturas nuevas
+    sesion = {"usuario": None, "compacto": False, "vista": None}
+
+    # OME-71: un solo lector para toda la app. Todas las pantallas comparten sus
+    # lecturas en memoria, así ninguna pisa el fichero de otra al guardar.
+    lecturas = RepositorioLecturas()
+    zonas_lector = RepositorioZonas()
+    lector = DashboardController(zonas_lector, lecturas, Simulador(zonas_lector, lecturas))
 
     # ---------- qué hay dentro de cada ruta ----------
 
-    def nuevo_dashboard():
-        return DashboardController(RepositorioZonas(), RepositorioLecturas(),
-                                   Simulador(RepositorioZonas(), RepositorioLecturas()))
+    def abrir(vista):
+        """Guarda la pantalla abierta y devuelve su contenido."""
+        sesion["vista"] = vista
+        return vista.construir()
 
     def contenido_inicio(usuario):
         if usuario.ROL == "jefe_sanidad":
-            return DashboardJefeView(usuario, nuevo_dashboard()).construir()
+            return abrir(DashboardJefeView(usuario, lector))
         try:
             if usuario.ROL == "responsable_carpa":  # OME-62
-                carpa = CarpaController(nuevo_dashboard(), ActuadoresController(RepositorioZonas()))
-                return DashboardCarpaView(usuario, carpa).construir()
+                carpa = CarpaController(lector, ActuadoresController(zonas_lector))
+                return abrir(DashboardCarpaView(usuario, carpa))
             if usuario.ROL == "tecnico_logistica":  # OME-63
-                tecnico = TecnicoController(nuevo_dashboard(), ActuadoresController(RepositorioZonas()),
-                                            RepositorioLecturas())
-                return DashboardTecnicoView(usuario, tecnico).construir()
+                tecnico = TecnicoController(lector, ActuadoresController(zonas_lector), lecturas)
+                return abrir(DashboardTecnicoView(usuario, tecnico))
         except NotImplementedError:
             pass  # hasta que su dashboard esté mergeado, sigue el inicio del Sprint 2
         return InicioView(
             usuario, ZonasController(RepositorioZonas(), repositorio),
-            dashboard=nuevo_dashboard(),
+            dashboard=lector,
         ).construir()
 
     def contenido_pendiente(usuario):
@@ -100,7 +118,7 @@ def main(page: ft.Page) -> None:
         return UsuariosView(usuario, UsuariosController(repositorio)).construir()
 
     def contenido_historico(usuario):
-        return HistoricoView(usuario, HistoricoController(RepositorioZonas(), RepositorioLecturas())).construir()
+        return abrir(HistoricoView(usuario, HistoricoController(RepositorioZonas(), lecturas)))
 
     PANTALLAS = {
         "/inicio": (contenido_inicio, "OME-40"),
@@ -112,6 +130,7 @@ def main(page: ft.Page) -> None:
 
     def construir_contenido(ruta, usuario):
         construir, tarea = PANTALLAS[ruta]
+        sesion["vista"] = None
         try:
             return construir(usuario)
         except NotImplementedError:
@@ -136,7 +155,25 @@ def main(page: ft.Page) -> None:
 
     def cerrar_sesion():
         sesion["usuario"] = None
+        sesion["vista"] = None
         page.go("/login")
+
+    # ---------- lecturas en directo (OME-71) ----------
+
+    async def leer_sensores():
+        """Cada INTERVALO_LECTURAS segundos: ronda nueva y refresco de la pantalla abierta."""
+        while True:
+            await asyncio.sleep(INTERVALO_LECTURAS)
+            usuario = sesion["usuario"]
+            if usuario is None or usuario.ROL not in ROLES_CON_LECTURAS:
+                continue
+            try:
+                lector.actualizar()
+                refrescar = getattr(sesion["vista"], "refrescar", None)
+                if refrescar is not None:
+                    refrescar()
+            except Exception:  # noqa: BLE001 · si una ronda falla, la siguiente lo vuelve a intentar
+                traceback.print_exc()
 
     # ---------- router ----------
 
@@ -174,6 +211,7 @@ def main(page: ft.Page) -> None:
 
     page.on_route_change = ruta_cambiada
     page.on_resized = ventana_cambiada
+    page.run_task(leer_sensores)
     page.go("/login")
 
 

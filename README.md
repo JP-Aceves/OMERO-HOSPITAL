@@ -142,6 +142,17 @@ Mientras un dashboard no esté hecho, `main.py` sigue enseñando el inicio del S
 
 **Cómo simula (OME-33).** Cada ronda crea una lectura por sensor: el valor parte de la última lectura guardada, se acerca un 20 % a su valor normal (el centro de la zona verde) y suma una variación aleatoria pequeña; un 5 % de las veces da un pico más allá del umbral crítico (hacia abajo en los sensores INVERSO) y en la ronda siguiente vuelve a lo normal. El depósito no tiene picos: solo baja entre 0,5 y 2 puntos por ronda y se rellena al 90-100 % cuando baja del 10 %. Opciones: `--rondas`, `--minutos` (separación entre rondas, 5 por defecto) y `--semilla` (mismos valores en cada ejecución); si ya hay lecturas se añaden detrás, así que para empezar de cero borra `data/lecturas.json`.
 
+**Lecturas en directo (OME-71).** Con la app abierta y una sesión de jefe, carpa o técnico, `main.py` pide una ronda nueva cada 5 segundos (`INTERVALO_LECTURAS`) y refresca la pantalla abierta: dashboards, alertas, semáforos, actuadores e histórico se actualizan solos. Todas las pantallas comparten el mismo lector y las mismas lecturas en memoria, así ninguna pisa el `lecturas.json` de otra. El LED de evacuación lo sigue apagando a mano el técnico.
+
+**Cómo predice el vaciado del depósito (OME-65).** `service/prediccion.py` ajusta una recta `nivel = a + b · t` por mínimos cuadrados, sin librerías, con `t` en minutos desde la primera lectura y `n` lecturas:
+
+```
+b = (n · Σt·y − Σt · Σy) / (n · Σt² − (Σt)²)    pendiente, en % por minuto (negativa si baja)
+a = (Σy − b · Σt) / n                            nivel que marca la recta en t = 0
+```
+
+El depósito llega a 0 % cuando `a + b · t = 0`, es decir, a los `t = −a / b` minutos de la primera lectura. Ejemplo: 100, 98, 96, 94 y 92 % cada 10 minutos dan `a = 100` y `b = −0,2`, así que se vacía a los 500 minutos. Solo se usan las lecturas desde el último rellenado (una subida de más de 10 puntos entre dos lecturas seguidas): con el histórico entero la gráfica es un diente de sierra y la pendiente sale mucho más pequeña de lo real (con 200 rondas y `--semilla 1`, 0,034 % por minuto con todo el histórico frente a 0,251 % por minuto en el último tramo). Devuelve `None` si en ese tramo hay menos de 5 lecturas o si el nivel no baja (`b ≥ 0`).
+
 ## Umbrales (fuente: tabla "Umbrales iniciales por sensor" del documento del proyecto)
 
 | `tipo` | Sensor | Unidad | Aviso | Crítico | Malo si | Rango simulado |
