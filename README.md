@@ -142,6 +142,8 @@ Mientras un dashboard no esté hecho, `main.py` sigue enseñando el inicio del S
 
 **Cómo simula (OME-33).** Cada ronda crea una lectura por sensor: el valor parte de la última lectura guardada, se acerca un 20 % a su valor normal (el centro de la zona verde) y suma una variación aleatoria pequeña; un 5 % de las veces da un pico más allá del umbral crítico (hacia abajo en los sensores INVERSO) y en la ronda siguiente vuelve a lo normal. El depósito no tiene picos: solo baja entre 0,5 y 2 puntos por ronda y se rellena al 90-100 % cuando baja del 10 %. Opciones: `--rondas`, `--minutos` (separación entre rondas, 5 por defecto) y `--semilla` (mismos valores en cada ejecución); si ya hay lecturas se añaden detrás, así que para empezar de cero borra `data/lecturas.json`.
 
+**Lecturas en directo (OME-71).** Con la app abierta y una sesión de jefe, carpa o técnico, `main.py` pide una ronda nueva cada 5 segundos (`INTERVALO_LECTURAS`) y refresca la pantalla abierta: dashboards, alertas, semáforos, actuadores e histórico se actualizan solos. Todas las pantallas comparten el mismo lector y las mismas lecturas en memoria, así ninguna pisa el `lecturas.json` de otra. El LED de evacuación lo sigue apagando a mano el técnico.
+
 **Cómo predice el vaciado del depósito (OME-65).** `service/prediccion.py` ajusta una recta `nivel = a + b · t` por mínimos cuadrados, sin librerías, con `t` en minutos desde la primera lectura y `n` lecturas:
 
 ```

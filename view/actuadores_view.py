@@ -14,13 +14,8 @@ class ActuadoresView(ft.Column):
         self._mensaje = ft.Text(color=tema.CRITICO, visible=False)
         super().__init__(
             controls=[
-                ft.Row(
-                    [
-                        ft.Text("Actuadores", size=18, weight=ft.FontWeight.BOLD, color=tema.TEXTO),
-                        tema.boton_secundario("Actualizar estados", self._actualizar),
-                    ],
-                    wrap=True,
-                ),
+                # OME-71: los estados se refrescan solos con cada ronda de lecturas
+                ft.Text("Actuadores", size=18, weight=ft.FontWeight.BOLD, color=tema.TEXTO),
                 self._filas,
                 self._mensaje,
             ],
@@ -59,8 +54,3 @@ class ActuadoresView(ft.Column):
             accion = "Apagar" if encendido else "Encender"
             controles.append(tema.boton_secundario(accion, cambiar, tooltip=f"{accion} {nombre}"))
         return ft.Row(controles, wrap=True, spacing=12, run_spacing=4)
-
-    async def _actualizar(self, _evento: ft.ControlEvent) -> None:
-        self.refrescar()
-        if self.page is not None:
-            self.update()

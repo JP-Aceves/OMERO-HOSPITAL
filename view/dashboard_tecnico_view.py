@@ -121,9 +121,9 @@ class DashboardTecnicoView:
             else:
                 panel_alertas.controls.append(alertas.construir())
 
-        async def actualizar(_evento: ft.ControlEvent) -> None:
+        def refrescar_datos() -> None:
+            """OME-71: main.py la llama tras cada ronda de lecturas automática."""
             try:
-                self.controlador.actualizar()
                 mostrar_datos()
                 mostrar_alertas()
             except (OSError, ValueError):
@@ -131,6 +131,17 @@ class DashboardTecnicoView:
             else:
                 mostrar_error(None)
             refrescar()
+
+        async def actualizar(_evento: ft.ControlEvent) -> None:
+            try:
+                self.controlador.actualizar()
+            except (OSError, ValueError):
+                mostrar_error("No se pudieron actualizar las lecturas. Vuelve a intentarlo.")
+                refrescar()
+                return
+            refrescar_datos()
+
+        self.refrescar = refrescar_datos
 
         async def cambiar_led(encendido: bool, zona_id: str) -> None:
             try:

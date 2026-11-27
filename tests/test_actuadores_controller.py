@@ -194,6 +194,9 @@ class _PaginaDePrueba:
     def update(self):
         pass
 
+    def run_task(self, *_args):
+        pass  # OME-71: las lecturas en directo no se arrancan en las pruebas
+
 
 def _recorrer(control):
     yield control
