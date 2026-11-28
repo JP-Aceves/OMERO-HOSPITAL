@@ -73,21 +73,65 @@ class UsuariosController:
 
     def pendientes(self) -> ListaEnlazada:
         """Cuentas con rol "pendiente", para enseñarlas arriba en la tabla del admin."""
-        raise NotImplementedError("OME-61")
+        with self._operaciones:
+            cuentas = self.repositorio.cargar()
+            pendientes = ListaEnlazada()
+
+            for cuenta in cuentas:
+                if cuenta.ROL == "pendiente":
+                    pendientes.insertar(cuenta)
+
+            return pendientes
+                
 
     def aprobar(self, usuario: str, rol: str) -> str | None:
         """Asigna un rol a una cuenta pendiente. None si va bien, o el mensaje de error.
 
         Errores: el usuario no existe, la cuenta no está pendiente o el rol no es válido.
         """
-        raise NotImplementedError("OME-61")
+        with self._operaciones:
+            cuenta = self.repositorio.buscar_por_usuario(usuario)
+
+            if cuenta is None:
+                return "El usuario no existe"
+
+            if cuenta.ROL != "pendiente":
+                return "La cuenta no está pendiente"
+
+            if rol not in(
+                "jefe_sanidad",
+                "responsable_carpa",
+                "tecnico_logistica"
+            ):
+                return "Selecciona un rol válido"
+
+            datos = cuenta.to_dict()
+            datos["rol"] = rol
+
+            try:
+                nueva_cuenta = crear_usuario(datos)
+            except ValueError:
+                return "Selecciona un rol válido"
+
+            try:
+                self.repositorio.actualizar(nueva_cuenta)
+            except ValueError:
+                return "El usuario no existe"
+
+            return None
+
 
     def crear_cuenta(self, nombre: str, usuario: str, contrasena: str, repetir: str, rol: str) -> str | None:
         """Alta directa desde Gestión de usuarios, ya con rol. Reutiliza RegistroController.
 
         None si se creó, o el mensaje de error (los mismos que el registro).
         """
-        raise NotImplementedError("OME-61")
+        from controller.registro_controller import RegistroController
+
+        registro = RegistroController(self.repositorio)
+
+        return registro.registrar(nombre, usuario, contrasena, repetir, rol)
+        
 
     def _hay_otro_administrador(self, usuario: str) -> bool:
         return any(

@@ -33,9 +33,27 @@ class RegistroController:
         return None
 
     def registrar_pendiente(self, nombre: str, usuario: str, contrasena: str, repetir: str) -> str | None:
-        """Como registrar(), pero sin rol: la cuenta se crea como Pendiente (OME-61, Mariana).
+        """"Registra una cuenta pendiente"""
 
-        Cuando esté hecho, registro_view deja de pedir el rol y llama a este método.
-        Devuelve None si se registró, o el mensaje de error.
-        """
-        raise NotImplementedError("OME-61")
+        if any(not campo.strip() for campo in (nombre, usuario, contrasena, repetir)):
+            return "Rellena todos los campos"
+
+        if contrasena != repetir:
+            return "Las contraseñas no coinciden"
+
+        sal, contrasena_hash = hashear(contrasena)
+
+        nuevo_usuario = crear_usuario({
+            "nombre": nombre.strip(),
+            "usuario": usuario.strip(),
+            "rol": "pendiente",
+            "sal": sal,
+            "hash": contrasena_hash,
+        })
+
+        try:
+            self.repositorio.anadir(nuevo_usuario)
+        except ValueError:
+            return "Ese usuario ya existe"
+
+        return None

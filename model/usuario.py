@@ -76,6 +76,7 @@ def crear_usuario(datos: dict) -> Usuario:
         "responsable_carpa": ResponsableCarpa,
         "tecnico_logistica": TecnicoLogistica,
         "administrador": Administrador,
+        "pendiente" : Pendiente,
     }
     clase_usuario = roles.get(datos["rol"])
     if clase_usuario is None:

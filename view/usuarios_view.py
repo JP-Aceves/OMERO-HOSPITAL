@@ -13,6 +13,12 @@ _ROLES = {
     "tecnico_logistica": "Técnico de logística",
 }
 
+_ROLES_APROBACION = {
+    "jefe_sanidad": "Jefe de sanidad",
+    "responsable_carpa": "Responsable de carpa",
+    "tecnico_logistica": "Técnico de logística",
+}
+
 
 class UsuariosView:
 
@@ -66,6 +72,8 @@ class UsuariosView:
             expand=True,
             scroll=ft.ScrollMode.AUTO,
         )
+
+        
 
         def refrescar(error: str | None = None, exito: str | None = None) -> None:
             cuentas, administrador = self._cuentas_y_administrador()
